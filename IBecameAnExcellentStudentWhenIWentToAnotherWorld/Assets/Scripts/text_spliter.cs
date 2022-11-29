@@ -11,6 +11,10 @@ public class text_spliter : MonoBehaviour
     private bool isNameReading = false; // переменная для считывания имени текущего персонажа.
     private bool break_bool = false; // переменная для остановки считывания строки.
     private int dialogNumber = 0;
+    private float time = 0; // переменная времени для последовательного выведения текста.
+    public float limit_time = 0.1f; // переменная предельного времени для вывода каждого отдельного символа.
+    public bool speakind = false; // булевая переменная, описывающая текущее действие персонажа.
+
     void Start()
     {
         // чтение из файла
@@ -68,7 +72,7 @@ public class text_spliter : MonoBehaviour
                     if (break_bool){
                         break_bool = false;
                         position = i;
-                        current_speech = current_speech.Trim(new char[] {'{', '}', ' '});
+                        current_speech = current_speech.Trim(new char[] {'{', '}', '\n'});
                         break;
                     }
                     isNameReading = true;
@@ -81,7 +85,10 @@ public class text_spliter : MonoBehaviour
 
     public string PrintTextAnimation(string str, ref int ind){
         str = str.Remove(ind);
-        ind++;
+        if (time >= limit_time){
+            time = 0;
+            ind++;
+        } else time += Time.deltaTime;
         return str;
     }
 }
