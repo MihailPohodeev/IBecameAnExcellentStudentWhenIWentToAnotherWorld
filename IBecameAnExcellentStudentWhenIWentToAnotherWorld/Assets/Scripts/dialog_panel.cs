@@ -40,7 +40,7 @@ public class dialog_panel : MonoBehaviour
         }
         if (isAnimation){
             if(speech_pos < txt_split.current_speech.Length){
-                textBar.GetComponent<Text>().text = '-' + txt_split.PrintTextAnimation(txt_split.current_speech, ref speech_pos);
+                textBar.GetComponent<Text>().text = txt_split.PrintTextAnimation(txt_split.current_speech, ref speech_pos);
             } else isAnimation = false;
         }
     }
