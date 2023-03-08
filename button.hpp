@@ -12,7 +12,11 @@ class Button{
 	FloatRect shape_rect;
 	
 	// цвет кнопки
-	Color shape_color;
+	Color shape_color,
+	outline_color;
+	
+	// размер текста
+	double text_size;
 	
 public:
 		
@@ -41,13 +45,19 @@ public:
 	
 	// конструктор
 	Button(int width, int height){
+		
+		shape_color = Color(255, 255, 255, 255);
+		outline_color = Color(0, 0, 0, 255);
+		
 		shape.setSize(Vector2f(width, height));
 		shape.setOrigin(Vector2f(width / 2, height / 2));
-		shape_color = Color(255, 255, 255, 255);
+		shape.setOutlineThickness(5.f);
 		button_text.setFont(main_font);
-		button_text.setFillColor(Color(64, 64, 64, 255));		
+		button_text.setFillColor(Color(0, 0, 0, 255));
+				
 		
 		alpha = 255;
+		text_size = 0;
 		
 		isActive = false;
 		anim_playing = false;
@@ -81,6 +91,8 @@ void Button::update(){
 	oldActive = isActive;
 	
 	shape.setFillColor(Color(shape_color.r, shape_color.g, shape_color.b, (char)alpha));
+	shape.setOutlineColor(Color(outline_color.r, outline_color.g, outline_color.b, (char)alpha));
+	button_text.setFillColor(Color(0, 0, 0, (char)alpha));
 	
 	window.draw(shape);
 	window.draw(button_text);
@@ -110,13 +122,14 @@ void Button::setSize(int width, int height){
 // установить текст
 void Button::setText(string str){
 	button_text.setString(str);
-	button_text.setOrigin(Vector2f(button_text.getCharacterSize() / 2, str.length() * button_text.getCharacterSize() / 2));
+	button_text.setOrigin(Vector2f(((string)button_text.getString().toAnsiString()).length() * text_size / 3.f, text_size / 2));
 }
 
 // установить размер шрифта
 void Button::setTextSize(double size){
+	text_size = size;
 	button_text.setCharacterSize(size);
-	button_text.setOrigin(Vector2f(button_text.getCharacterSize() / 2, button_text.getOrigin().y));
+	button_text.setOrigin(Vector2f(((string)button_text.getString().toAnsiString()).length() * text_size / 3.f, text_size / 2));
 }
 
 // получить размер кнопки
@@ -134,6 +147,7 @@ void Button::anim_disappearing(){
 	if (alpha > 0){
 		alpha -= anim_speed * 50 * deltaTime;
 		shape.move(anim_speed * 2 * deltaTime, 0);
+		button_text.move(anim_speed * 2 * deltaTime, 0);
 	}
 	else {
 		alpha = 0;
@@ -146,10 +160,14 @@ void Button::anim_appearing(){
 	static bool isFirst = true;
 	if (isFirst) {
 		shape.setPosition(2 * position.x - shape.getPosition().x, shape.getPosition().y);
+		button_text.setPosition(2 * position.x - button_text.getPosition().x, shape.getPosition().y);
 		isFirst = false;
 	}
 	if (alpha < 255) alpha += anim_speed * 50 * deltaTime;
-	if (position.x > shape.getPosition().x) shape.move(anim_speed * 2 * deltaTime, 0);
+	if (position.x > shape.getPosition().x) {
+		shape.move(anim_speed * 2 * deltaTime, 0);
+		button_text.move(anim_speed * 2 * deltaTime, 0);
+	}
 	if (shape.getPosition().x >= position.x && alpha >= 255){
 		alpha = 255;
 		isFirst = true;

@@ -12,6 +12,8 @@ class inventory{
 	
 	Clock clock; // таймер
 	
+	Text inventary_title; // надпись "инвентарь"
+	
 public:
 	
 	bool isActive, // активен ли сейчас интерфейс
@@ -38,6 +40,13 @@ public:
 		
 		isActive = false;
 		onClick = false;
+		
+		inventary_title.setFont(main_font);
+		inventary_title.setFillColor(Color(255, 255, 255, 0));
+		inventary_title.setCharacterSize((HEIGHT + WIDTH) / 25);
+		inventary_title.setString("»Ќ¬≈Ќ“ј–№");
+		inventary_title.setOrigin(Vector2f(((string)inventary_title.getString().toAnsiString()).length() * inventary_title.getCharacterSize() / 3.f, inventary_title.getCharacterSize() / 2));
+		inventary_title.setPosition(Vector2f(WIDTH / 2, HEIGHT / 6));
 		
 	}
 };
@@ -78,6 +87,7 @@ void inventory::update(){
 	}
 	
 	background.setFillColor(Color(0, 0, 0, (char)alpha));
+	inventary_title.setFillColor(Color(255, 255, 255, (char)255 * alpha / max_darkness));
 }
 
 void inventory::render(){
@@ -85,6 +95,7 @@ void inventory::render(){
 	for (int i = 0; i < 8; i++){
 		slots[i].render();
 	}
+	window.draw(inventary_title);
 }
 
 

@@ -29,6 +29,8 @@ public:
 		shape.setSize(Vector2f(HEIGHT * 0.2f, HEIGHT * 0.2f));
 		shape.setOrigin(Vector2f(shape.getSize().x / 2, shape.getSize().y / 2));
 		shape.setFillColor(slot_color);
+		shape.setOutlineThickness(5.f);
+		shape.setOutlineColor(Color(0, 0, 0, 0));
 		
 		isActive = false;
 	}
@@ -67,6 +69,7 @@ void slot::update(){
 	slot_color = Color(slot_color.r, slot_color.g, slot_color.b, (char)alpha);
 	
 	shape.setFillColor(slot_color);
+	shape.setOutlineColor(Color(0, 0, 0, char(alpha)));
 }
 
 // установить координаты

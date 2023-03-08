@@ -36,7 +36,8 @@ public:
 	Vector2f right_person_position; // правая позиция для персонажей
 	
 	Vector2f bar_position; // позиция диалогового окна
-	Vector2f current_left_positoin; // позиция главного игрока
+	Vector2f current_left_positoin; // левая позиция персонажа
+	Vector2f current_right_positoin; // правая позиция персонажа
 	Vector2f speech_position; // позиция текста реплики
 	Vector2f name_position; // позиция текста имени
 	
@@ -64,8 +65,11 @@ public:
 		
 		// установка размеров и позиций элементам интерфейса
 		panel_shape.setSize(Vector2f(WIDTH * 0.95, HEIGHT * 0.2));
+		panel_shape.setOutlineThickness(5.f);
+		panel_shape.setOutlineColor(Color(0,0,0,0));
 		center_bar_position = bar_position = Vector2f((WIDTH - panel_shape.getSize().x) / 2, (HEIGHT - panel_shape.getSize().y) - (WIDTH - panel_shape.getSize().x) / 2);
 		left_person_position = current_left_positoin = Vector2f(center_bar_position.x + panel_shape.getSize().x * 0.2f, center_bar_position.y);
+		right_person_position = current_right_positoin = Vector2f(center_bar_position.x + panel_shape.getSize().x * 0.8f, center_bar_position.y);
 		panel_shape.setPosition(center_bar_position);
 		speech_position = Vector2f(center_bar_position.x + panel_shape.getSize().x / 2 - text_speech_size / 2, center_bar_position.y + panel_shape.getSize().y / 2 - text_speech_size / 2);
 		name_position = Vector2f(current_left_positoin.x , bar_position.y);
@@ -112,10 +116,10 @@ public:
 		character[0].setPosition(current_left_positoin);
 		
 		character[1].name = "дима";
-		character[1].setPosition(current_left_positoin);
+		character[1].setPosition(current_right_positoin);
 		
 		character[2].name = "элеонора";
-		character[2].setPosition(current_left_positoin);
+		character[2].setPosition(current_right_positoin);
 	}
 };
 
@@ -132,6 +136,7 @@ void panel::update(bool notInventary){
 					getline(script, script_text); // получение строки из текстового документа
 					// если строка нулевая, закрыть окно
 					if (script_text.length() == 0) {
+						(*current_person).isActive = false;
 						isActive = false;
 						DISAPPEARING = true;
 						return;
@@ -143,17 +148,14 @@ void panel::update(bool notInventary){
 					
 					
 					// активация и деактивация текущего персонажа
-//					MultiByteToWideChar()
-					
 					(*current_person).isActive = false;
+					// выбор текущего персонажа исходя из имени текущего спикера
 					for(int i = 0; i < (sizeof(character)/sizeof(person)); i++){
-						cout<<character[i].name<<' '<<name_text<<'\n';
-						if(character[i].name == name_text){
-							(*current_person) = character[i];
+						if(character[i].name == String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString()){
+							current_person = &character[i];
 							(*current_person).isActive = true;
 						}
 					}
-					cout<<'\n';
 				}
 				// иначе, ускорить набор текста
 				else{
@@ -196,6 +198,7 @@ void panel::update(bool notInventary){
 	
 	
 	panel_shape.setFillColor(bar_color);
+	panel_shape.setOutlineColor(Color(0,0,0,bar_color.a));
 	current_speech.setFillColor(text_color);
 	person_name.setFillColor(text_color);
 	
@@ -203,7 +206,7 @@ void panel::update(bool notInventary){
 	person_name.setPosition(name_position);
 	
 	current_speech.setString(String::fromUtf8(current_text.begin(), current_text.end()));
-	person_name.setString(String::fromUtf8(name_text.begin(), name_text.end()));
+	person_name.setString(String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString());
 }
 
 // функция отрисовки объектов.
