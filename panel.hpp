@@ -16,7 +16,8 @@ public:
 	
 	double anim_speed, // скорость воспроизведения анимации диалоговой панели
 	printing_delay, // задержка между печатью символов
-	time_for_printing; // таймер для печати символов на диалоговой панели
+	time_for_printing, // таймер для печати символов на диалоговой панели
+	alpha; // степень прозрачности панели
 	
 	int text_speech_size, // размер диалогового текста
 	text_name_size, // размер текста имени персонажа
@@ -65,7 +66,7 @@ public:
 		
 		// установка размеров и позиций элементам интерфейса
 		panel_shape.setSize(Vector2f(WIDTH * 0.95, HEIGHT * 0.2));
-		panel_shape.setOutlineThickness(5.f);
+		panel_shape.setOutlineThickness(thick_size);
 		panel_shape.setOutlineColor(Color(0,0,0,0));
 		center_bar_position = bar_position = Vector2f((WIDTH - panel_shape.getSize().x) / 2, (HEIGHT - panel_shape.getSize().y) - (WIDTH - panel_shape.getSize().x) / 2);
 		left_person_position = current_left_positoin = Vector2f(center_bar_position.x + panel_shape.getSize().x * 0.2f, center_bar_position.y);
@@ -75,8 +76,8 @@ public:
 		name_position = Vector2f(current_left_positoin.x , bar_position.y);
 		
 		// установка цвета
-		bar_color = Color(255, 255, 255, 0);
-		text_color = Color(0, 0, 0, 0);
+		bar_color = Color(255, 255, 255, 255);
+		text_color = Color(0, 0, 0, 255);
 		
 		// создание и загрузка текста и шрифтов
 		current_speech.setFont(main_font);
@@ -197,10 +198,10 @@ void panel::update(bool notInventary){
 	panel_shape.setPosition(bar_position);
 	
 	
-	panel_shape.setFillColor(bar_color);
-	panel_shape.setOutlineColor(Color(0,0,0,bar_color.a));
-	current_speech.setFillColor(text_color);
-	person_name.setFillColor(text_color);
+	panel_shape.setFillColor(Color(255, 255, 255, (char)alpha));
+	panel_shape.setOutlineColor(Color(0,0,0, (char)alpha));
+	current_speech.setFillColor(Color(0,0,0, (char)alpha));
+	person_name.setFillColor(Color(0,0,0, (char)alpha));
 	
 	current_speech.setPosition(speech_position);
 	person_name.setPosition(name_position);
@@ -237,25 +238,30 @@ void panel::parsing(string str){
 
 // анимация исчезновения панели.
 void panel::anim_disappearing(){
-	if(bar_color.a > 0){
+	if(alpha > 0){
 		// изменение позиции
 		bar_position.y += anim_speed * deltaTime;
 		speech_position.y += anim_speed * deltaTime;
 		name_position.y += anim_speed * deltaTime;
 		//изменение цвета
-		text_color.a = bar_color.a--;
-	} else DISAPPEARING = false;
+		alpha -= anim_speed * 10 * deltaTime;
+		if (alpha < 0) alpha = 0;
+	} 
+	else {
+		DISAPPEARING = false;
+	}
 }
 
 // анимация появления панели.
 void panel::anim_appearing(){
-	if (bar_color.a < 255){
-		text_color.a = bar_color.a++;
+	if (alpha < 255){
+		alpha += anim_speed * 10 * deltaTime;
 		if (bar_position.y > center_bar_position.y){
 			bar_position.y -= anim_speed * deltaTime;
 			speech_position.y -= anim_speed * deltaTime;
 			name_position.y -= anim_speed * deltaTime;
 		}
+		if (alpha > 255) alpha = 255;
 	}
 	else{
 		APPEARING = false;
@@ -275,7 +281,7 @@ void panel::anim_text(){
 		current_text += script_text[i];
 		
 		// перевод на новую строку
-		if ((line_breaks_count> symbols_count) && (script_text[i] == ' ')) {
+		if ((line_breaks_count > symbols_count) && (script_text[i] == ' ')) {
 			current_text += '\n';
 			line_breaks_count = 0;
 			isBreaking = true;

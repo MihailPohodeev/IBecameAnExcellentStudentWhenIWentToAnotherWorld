@@ -1,4 +1,4 @@
-#include "settings.hpp"
+#include "check_mark.hpp"
 
 class Button{
 	
@@ -28,7 +28,7 @@ public:
 	
 	double alpha; // альфа-канал кнопки
 	
-	// ~~~ФУНКЦИИ~~~
+	// ~~~~~ФУНКЦИИ~~~~~
 	void update(); // обновление
 	bool onClick(); // действие по клику ЛКМ
 	void setPosition(int x, int y); // установить позицию
@@ -42,7 +42,7 @@ public:
 	Vector2f getPosition(); // получить позицию кнопки
 	
 	
-	
+	Button();
 	// конструктор
 	Button(int width, int height){
 		
@@ -51,7 +51,7 @@ public:
 		
 		shape.setSize(Vector2f(width, height));
 		shape.setOrigin(Vector2f(width / 2, height / 2));
-		shape.setOutlineThickness(5.f);
+		shape.setOutlineThickness(thick_size);
 		button_text.setFont(main_font);
 		button_text.setFillColor(Color(0, 0, 0, 255));
 				
@@ -148,9 +148,9 @@ void Button::anim_disappearing(){
 		alpha -= anim_speed * 50 * deltaTime;
 		shape.move(anim_speed * 2 * deltaTime, 0);
 		button_text.move(anim_speed * 2 * deltaTime, 0);
+		if (alpha < 0) alpha = 0;
 	}
 	else {
-		alpha = 0;
 		anim_playing = false;
 	}
 }
@@ -167,9 +167,9 @@ void Button::anim_appearing(){
 	if (position.x > shape.getPosition().x) {
 		shape.move(anim_speed * 2 * deltaTime, 0);
 		button_text.move(anim_speed * 2 * deltaTime, 0);
+		if (alpha > 255) alpha = 255;
 	}
 	if (shape.getPosition().x >= position.x && alpha >= 255){
-		alpha = 255;
 		isFirst = true;
 		anim_playing = false;
 	}

@@ -6,10 +6,11 @@ int main()
     main_font.loadFromFile("Fonts/Chava-Regular.ttf");
     // текстура заднего фона
 
-    constructor::menu();
-    if (start_game) constructor::game();
-
-//	constructor::game();
+	while(window.isOpen()){
+	    constructor::menu();
+	    if (to_settings) constructor::settings();
+	    if (start_game) constructor::game();
+	}
 	
     return 0;
 }

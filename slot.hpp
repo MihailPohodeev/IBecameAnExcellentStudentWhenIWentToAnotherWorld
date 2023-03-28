@@ -1,4 +1,4 @@
-#include "button.hpp"
+#include "drop_menu.hpp"
 
 // класс €чейки инвентар€
 class slot{
@@ -29,7 +29,7 @@ public:
 		shape.setSize(Vector2f(HEIGHT * 0.2f, HEIGHT * 0.2f));
 		shape.setOrigin(Vector2f(shape.getSize().x / 2, shape.getSize().y / 2));
 		shape.setFillColor(slot_color);
-		shape.setOutlineThickness(5.f);
+		shape.setOutlineThickness(thick_size);
 		shape.setOutlineColor(Color(0, 0, 0, 0));
 		
 		isActive = false;
