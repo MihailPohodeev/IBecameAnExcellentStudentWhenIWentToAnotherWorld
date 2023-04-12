@@ -38,10 +38,9 @@ View view(FloatRect(0.f, 0.f, WIDTH, HEIGHT));
 
 // масштабирование и применение текстур к заднему фону
 void background_init(Texture &txt, RectangleShape &background){
-	background.setSize(Vector2f(WIDTH, HEIGHT));
-    background.setTexture(&txt);
-    background.setOrigin(Vector2f(background.getSize().x / 2, background.getSize().y / 2));
-    background.setPosition(WIDTH / 2, HEIGHT / 2);
+	background.setSize(Vector2f(WIDTH * 1.02f, HEIGHT));
+	background.setTexture(&txt);
+	background.setTextureRect(IntRect(0, 0, txt.getSize().x, txt.getSize().y));
 }
 
 // функция перевода дробного числа в строку

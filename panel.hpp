@@ -13,7 +13,8 @@ public:
 	interrogation, // режим допроса
 	act_calculating, // вычисление номера акта
 	help, // подсказка игроку
-	next; // закончена ли анимация набора текста
+	next, // закончена ли анимация набора текста
+	isDark; // затемнён ли экран
 	
 	string current_text, script_text, // текст сценария в текстовой переменной
 	name_text, // строка имени текущего персонажа
@@ -22,7 +23,8 @@ public:
 	double anim_speed, // скорость воспроизведения анимации диалоговой панели
 	printing_delay, // задержка между печатью символов
 	time_for_printing, // таймер для печати символов на диалоговой панели
-	alpha; // степень прозрачности панели
+	alpha, // степень прозрачности панели
+	dark_alpha; // степень прозрачности фона затемнения
 	
 	int text_speech_size, // размер диалогового текста
 	text_name_size, // размер текста имени персонажа
@@ -32,11 +34,12 @@ public:
 	fstream script; //поток для чтения.
 	
 	person *current_person, // текущий персонаж, который произносит реплику
-	character[3];// главный герой.
+	character[4];// главный герой.
 	
 	Clock clock_for_printing; // таймер для равномерной печати текста в диалоговом окне
 	
 	RectangleShape panel_shape; // форма панели
+	RectangleShape dark_background; // форма для затемнения экрана
 	RectangleShape mouse_icon; // иконка мыши для обозначения клика ЛКМ
 	RectangleShape arrows; // стрелочки далее
 	
@@ -91,6 +94,8 @@ public:
 		speech_position = Vector2f(center_bar_position.x + panel_shape.getSize().x / 2 - text_speech_size / 2, center_bar_position.y + panel_shape.getSize().y / 2 - text_speech_size / 2);
 		name_position = Vector2f(current_left_positoin.x , bar_position.y);
 		
+		
+		// инициализация иконок
 		icons.loadFromFile("Sprites/icons.png");
 		
 		mouse_sprites[0] = IntRect(0, 0, 8, 17);
@@ -100,7 +105,7 @@ public:
 		arrows_sprites[1] = IntRect(15, 0, 16, 17);
 		
 		mouse_icon.setSize(Vector2f((WIDTH + HEIGHT) * 0.02f, (WIDTH + HEIGHT) * 0.03f));
-		mouse_icon.setPosition(Vector2f(WIDTH - mouse_icon.getSize().x  * 1.5f, HEIGHT - mouse_icon.getSize().y * 1.5f));
+		mouse_icon.setPosition(Vector2f(WIDTH - mouse_icon.getSize().x  * 2.f, HEIGHT - mouse_icon.getSize().y * 1.5f));
 		mouse_icon.setTexture(&icons);
 		mouse_icon.setTextureRect(mouse_sprites[0]);
 		
@@ -111,6 +116,12 @@ public:
 		arrows.setTextureRect(arrows_sprites[0]);
 		
 		
+		// инициализация фона затемнения.
+		
+		isDark = true;
+		dark_alpha = 255;
+		dark_background.setSize(Vector2f(WIDTH, HEIGHT));
+		dark_background.setFillColor(Color(0,0,0, (char)dark_alpha));
 		
 		
 		// установка цвета
@@ -156,6 +167,7 @@ public:
 		character[0].name = "виктор";
 		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
 		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
+		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
 		character[0].setPosition(current_left_positoin);
 		
 		character[1].name = "дима";
@@ -163,6 +175,9 @@ public:
 		
 		character[2].name = "элеонора";
 		character[2].setPosition(current_right_positoin);
+		
+		character[3].name = "преподаватель";
+		character[3].setPosition(current_right_positoin);
 	}
 };
 
@@ -171,7 +186,7 @@ void panel::update(bool notInventary){
 	if (Mouse::isButtonPressed(Mouse::Left) && !notInventary){
 		if (left_click){
 			// если диалоговое окно открыто
-			if(isActive){
+			if(isActive && !DISAPPEARING){
 				// если в данный момент текст не печатается
 				if (!printing){
 					thinking = speaking = false;
@@ -221,7 +236,8 @@ void panel::update(bool notInventary){
 	}
 	
 	// отключение подсказки в виде иконки мыши
-	if(alpha > 1) help = false;
+	if(alpha > 2) help = false;
+	else help = true;
 	
 	if ((double)anim_clock.getElapsedTime().asMicroseconds() / 1000000 > 1) {
 		mouse_icon.setTextureRect(mouse_sprites[1]);
@@ -247,6 +263,21 @@ void panel::update(bool notInventary){
 	
 	(*current_person).update();
 	
+	// изменения фона затемнения
+	
+	if (isDark){
+		if (dark_alpha < 255){
+			dark_alpha += anim_speed * 15 * deltaTime;
+			if (dark_alpha > 255) dark_alpha = 255;
+		}
+	}
+	else {
+		if (dark_alpha > 0){
+			dark_alpha -= anim_speed * 15 * deltaTime;
+			if (dark_alpha < 0) dark_alpha = 0;
+		}
+	}
+	
 	
 	// обновление характеристик элементов интерфейса.
 	panel_shape.setPosition(bar_position);
@@ -264,17 +295,22 @@ void panel::update(bool notInventary){
 		panel_shape.setOutlineColor(Color(0,0,0, (char)alpha));
 	}
 	
+	dark_background.setFillColor(Color(0, 0, 0, (char)dark_alpha));
+	
 	current_speech.setPosition(speech_position);
 	person_name.setPosition((*current_person).shape.getPosition().x, name_position.y);
 	
 	current_speech.setString(String::fromUtf8(current_text.begin(), current_text.end()));
 	person_name.setString(String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString());
 	
+	for (int i = 0; i < 3; i++) character[i].printing = printing;
+	
 	if ((double)anim_clock.getElapsedTime().asMicroseconds() / 1000000 >= 2) anim_clock.restart();
 }
 
 // функция отрисовки объектов.
 void panel::render(){
+	window.draw(dark_background);
 	window.draw((*current_person).shape);
 	window.draw(panel_shape);
 	window.draw(current_speech);
@@ -297,7 +333,6 @@ void panel::parsing(string str){
 		else if (str[i] == '}'){
 			act_calculating = false;
 			act = stoi(act_number);
-			cout<<act<<'\n';
 			continue;
 		}
 		else if (str[i] == '<') {
@@ -328,18 +363,19 @@ void panel::anim_disappearing(){
 		speech_position.y += anim_speed * deltaTime;
 		name_position.y += anim_speed * deltaTime;
 		//изменение цвета
-		alpha -= anim_speed * 10 * deltaTime;
+		alpha -= anim_speed * 15 * deltaTime;
 		if (alpha < 0) alpha = 0;
 	} 
 	else {
 		DISAPPEARING = false;
+		isActive = false;
 	}
 }
 
 // анимация появления панели.
 void panel::anim_appearing(){
 	if (alpha < 255){
-		alpha += anim_speed * 10 * deltaTime;
+		alpha += anim_speed * 15 * deltaTime;
 		if (bar_position.y > center_bar_position.y){
 			bar_position.y -= anim_speed * deltaTime;
 			speech_position.y -= anim_speed * deltaTime;

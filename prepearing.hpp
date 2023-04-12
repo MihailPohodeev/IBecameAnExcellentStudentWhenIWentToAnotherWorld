@@ -3,6 +3,7 @@
 namespace constructor{
 	
 	Clock clock;
+	void background_movement(RectangleShape &back);
     
     // метод меню
     void menu(){
@@ -222,6 +223,7 @@ namespace constructor{
 		Clock fps_clock; // часы для просчёта количества кадров в секунду
 		Text fps_text; // текст отображения fps
 		double fps = 0;
+		int old_act = main_bar.act;
 	
 		
 		Texture back_texture; // текстура заднего фона в корридоре
@@ -256,15 +258,28 @@ namespace constructor{
 	                window.close();
 	        }
 			
-			if (main_bar.act == 1) background_init(back_texture, background);
-			else if (main_bar.act == 2) background_init(classroom_texture, background);
-			else background_init(black, background);
 			
 			// получение позиции мыши
 			mouse_position = Mouse::getPosition(window);
 			
 			main_bar.update(invent.isActive);
 			invent.update();
+			background_movement(background);
+			
+			if (old_act != main_bar.act){
+				// затемнение заднего фона
+				main_bar.isDark = true;
+				// исчезновение панели диалогов
+				main_bar.DISAPPEARING = true;
+			}
+			if ((main_bar.dark_alpha >= 254) && (main_bar.act > 0) && (!main_bar.isActive)){
+				if (main_bar.act == 1) background_init(back_texture, background);
+				else if (main_bar.act == 2) {
+					background_init(classroom_texture, background);
+					for (int i = 0; i < 3; i++) main_bar.character[i].isSitting = true;
+				}
+				main_bar.isDark = false;
+			}
 			
 	        window.clear();
 	        window.setView(view);
@@ -283,6 +298,24 @@ namespace constructor{
 	        	fps = 0;
 	        	fps_clock.restart();
 			}
+			old_act = main_bar.act;
 	    }	
+	}
+	
+	// плавное движение заднего фона
+	void background_movement(RectangleShape &back){
+		static bool left = true;
+		if (left){
+			back.move(-WIDTH * 0.005f * deltaTime, 0);
+			if (back.getPosition().x < (WIDTH - back.getSize().x)){
+				left = false;
+			}
+		}
+		if (!left){
+			back.move(WIDTH * 0.005f * deltaTime, 0);
+			if (back.getPosition().x > 0){
+				left = true;
+			}
+		}
 	}	
 }

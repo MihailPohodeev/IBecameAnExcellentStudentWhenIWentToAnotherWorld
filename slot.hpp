@@ -11,8 +11,8 @@ class slot{
 	
 	double alpha; // альфа-канал €чейки
 		
-public:	
-
+public:
+	
 	bool isActive; // активна ли €чейка
 	
 	void update(); // обновление
