@@ -7,9 +7,10 @@ int main()
     // текстура заднего фона
 
 	while(window.isOpen()){
-	    constructor::menu();
-	    if (to_settings) constructor::settings();
-	    if (start_game) constructor::game();
+//	    constructor::menu();
+//	    if (to_settings) constructor::settings();
+//	    if (start_game) constructor::game();
+		constructor::game();
 	}
 	
     return 0;

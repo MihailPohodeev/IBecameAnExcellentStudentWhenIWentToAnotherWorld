@@ -56,7 +56,7 @@ public:
 		button_text.setFillColor(Color(0, 0, 0, 255));
 				
 		
-		alpha = 255;
+		alpha = 0;
 		text_size = 0;
 		
 		isActive = false;
@@ -148,11 +148,11 @@ void Button::anim_disappearing(){
 		alpha -= anim_speed * 50 * deltaTime;
 		shape.move(anim_speed * 2 * deltaTime, 0);
 		button_text.move(anim_speed * 2 * deltaTime, 0);
-		if (alpha < 0) alpha = 0;
 	}
 	else {
 		anim_playing = false;
 	}
+	if (alpha < 0) alpha = 0;
 }
 
 // анимация появления
@@ -167,12 +167,12 @@ void Button::anim_appearing(){
 	if (position.x > shape.getPosition().x) {
 		shape.move(anim_speed * 2 * deltaTime, 0);
 		button_text.move(anim_speed * 2 * deltaTime, 0);
-		if (alpha > 255) alpha = 255;
 	}
 	if (shape.getPosition().x >= position.x && alpha >= 255){
 		isFirst = true;
 		anim_playing = false;
 	}
+	if (alpha > 255) alpha = 255;
 }
 
 // постепенное исчезновение кнопок.

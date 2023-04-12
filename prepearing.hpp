@@ -22,6 +22,10 @@ namespace constructor{
     	Button settings = Button(WIDTH / 5, HEIGHT / 10);
     	Button exit = Button(WIDTH / 5, HEIGHT / 10);
     	
+    	start.isActive = true;
+    	settings.isActive = true;
+    	exit.isActive = true;
+    	
     	start.setText("начать игру");
 		settings.setText("параметры");
 		exit.setText("выход");
@@ -220,10 +224,18 @@ namespace constructor{
 		double fps = 0;
 	
 		
-		Texture back_texture; // текстура заднего фона
+		Texture back_texture; // текстура заднего фона в корридоре
+		Texture classroom_texture; // текстура заднего фона в аудитории
+		Texture black; // текстура чёрного фона
+		
 	    RectangleShape background; // форма заднего фона
-	    back_texture.loadFromFile("Sprites/background.jpg");
+	    
+	    // загрузка изображений
 	    if (!back_texture.loadFromFile("Sprites/background.jpg")) cout<<"background picture loading failed"<<'\n';
+	    else cout<<"background picture loaded succsessfully"<<'\n';
+	    if (!classroom_texture.loadFromFile("Sprites/classroom.jpg")) cout<<"classroom picture loading failed"<<'\n';
+	    else cout<<"classroom picture loaded succsessfully"<<'\n';
+	    if (!black.loadFromFile("Sprites/black.png")) cout<<"background picture loading failed"<<'\n';
 	    else cout<<"background picture loaded succsessfully"<<'\n';
 	    
 	    fps_text.setFont(main_font);
@@ -231,7 +243,7 @@ namespace constructor{
 	    
 	    // масштабирование заднего фона
 	    background_init(back_texture, background);
-	    window.setFramerateLimit(60);
+//	    window.setFramerateLimit(60);
 	    
 		while (window.isOpen())
 	    {
@@ -243,6 +255,10 @@ namespace constructor{
 	            if (event.type == sf::Event::Closed)
 	                window.close();
 	        }
+			
+			if (main_bar.act == 1) background_init(back_texture, background);
+			else if (main_bar.act == 2) background_init(classroom_texture, background);
+			else background_init(black, background);
 			
 			// получение позиции мыши
 			mouse_position = Mouse::getPosition(window);

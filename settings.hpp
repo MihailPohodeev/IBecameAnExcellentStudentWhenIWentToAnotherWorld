@@ -4,6 +4,7 @@
 #include <sstream>
 #include <string>
 #include <stdio.h>
+#include <cassert>
 #include <cmath>
 
 using namespace std;
@@ -48,5 +49,17 @@ string to_string(double num){
 	ostringstream result;
 	result << num;
 	return result.str();
+}
+ // перевод строки в целое число
+int stoi(string str)
+{
+	int result = 0;
+	for (int i = 0; i < str.length(); i++){
+		assert((str[i] >= '0') && (str[i] <= '9'));
+		result += str[i] - '0';
+		result *= 10;
+	}
+	result /= 10;
+	return result;
 }
 

@@ -88,6 +88,7 @@ void person::saying(){
 		anim_count++;
 		anim_clock.restart();
 	}
+	shape.setTexture(&say_txt);
 	if (anim_count > 1) anim_count = 0;
 	shape.setOrigin(shape_origin[anim_count]);
 	shape.setTextureRect(say[anim_count]);
@@ -101,6 +102,7 @@ void person::thinking(){
 	}
 	if (anim_count > 3) anim_count = 0;
 //	shape.setOrigin(shape_origin[anim_count]);
+	shape.setTexture(&think_txt);
 	shape.setTextureRect(think[anim_count]);
 }
 

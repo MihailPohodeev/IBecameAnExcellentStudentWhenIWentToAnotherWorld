@@ -9,10 +9,15 @@ public:
 	thinking, // думает ли сейчас персонаж
 	speaking, // говорит ли сейчас персонаж
 	APPEARING, // появление диалоговой панели
-	DISAPPEARING; // исчезновение диалоговой панели
+	DISAPPEARING, // исчезновение диалоговой панели
+	interrogation, // режим допроса
+	act_calculating, // вычисление номера акта
+	help, // подсказка игроку
+	next; // закончена ли анимация набора текста
 	
 	string current_text, script_text, // текст сценария в текстовой переменной
-	name_text; // строка имени текущего персонажа
+	name_text, // строка имени текущего персонажа
+	act_number; // номер акта
 	
 	double anim_speed, // скорость воспроизведения анимации диалоговой панели
 	printing_delay, // задержка между печатью символов
@@ -21,7 +26,8 @@ public:
 	
 	int text_speech_size, // размер диалогового текста
 	text_name_size, // размер текста имени персонажа
-	symbols_count; // максимальное количество символов, находящихся на одной строке в диалоговом окне
+	symbols_count, // максимальное количество символов, находящихся на одной строке в диалоговом окне
+	act; // номер акта
 	
 	fstream script; //поток для чтения.
 	
@@ -31,6 +37,8 @@ public:
 	Clock clock_for_printing; // таймер для равномерной печати текста в диалоговом окне
 	
 	RectangleShape panel_shape; // форма панели
+	RectangleShape mouse_icon; // иконка мыши для обозначения клика ЛКМ
+	RectangleShape arrows; // стрелочки далее
 	
 	Vector2f center_bar_position; // постоянная позиция панели диалогов
 	Vector2f left_person_position; // левая позиция для персонажей
@@ -46,7 +54,15 @@ public:
 	Text person_name; // тектовая переменная, хранящая имя текущего персонажа
 	
 	Color bar_color, // цвет и прозрачность диалоговой панели
-	text_color; // цвет текста
+	text_color, // цвет текста
+	interrogation_text_color; // цвет текста при допросе
+	
+	Texture icons; // текстура иконок
+	
+	IntRect mouse_sprites[2]; // позиция иконки мыши на атласе иконок
+	IntRect arrows_sprites[2]; // позиция иконки стрелок на атласе иконок
+	
+	Clock anim_clock; // таймер для анимации
 	
 //	~~~~~ФУНКЦИИ~~~~~
 	void update(bool notInventary); // обновление
@@ -75,7 +91,30 @@ public:
 		speech_position = Vector2f(center_bar_position.x + panel_shape.getSize().x / 2 - text_speech_size / 2, center_bar_position.y + panel_shape.getSize().y / 2 - text_speech_size / 2);
 		name_position = Vector2f(current_left_positoin.x , bar_position.y);
 		
+		icons.loadFromFile("Sprites/icons.png");
+		
+		mouse_sprites[0] = IntRect(0, 0, 8, 17);
+		mouse_sprites[1] = IntRect(8, 0, 8, 17);
+		
+		arrows_sprites[0] = IntRect(17, 0, 16, 17);
+		arrows_sprites[1] = IntRect(15, 0, 16, 17);
+		
+		mouse_icon.setSize(Vector2f((WIDTH + HEIGHT) * 0.02f, (WIDTH + HEIGHT) * 0.03f));
+		mouse_icon.setPosition(Vector2f(WIDTH - mouse_icon.getSize().x  * 1.5f, HEIGHT - mouse_icon.getSize().y * 1.5f));
+		mouse_icon.setTexture(&icons);
+		mouse_icon.setTextureRect(mouse_sprites[0]);
+		
+		arrows.setSize(Vector2f((WIDTH + HEIGHT) * 0.03f, (WIDTH + HEIGHT) * 0.015f));
+		arrows.setPosition(Vector2f(panel_shape.getPosition().x + panel_shape.getSize().x - arrows.getSize().x  * 1.5f, panel_shape.getPosition().y + panel_shape.getSize().y / 2 - arrows.getSize().y * 0.5f));
+		arrows.setTexture(&icons);
+		arrows.setFillColor(Color(0, 0, 0, 255));
+		arrows.setTextureRect(arrows_sprites[0]);
+		
+		
+		
+		
 		// установка цвета
+		interrogation_text_color = Color(0, 255, 0, 255);
 		bar_color = Color(255, 255, 255, 255);
 		text_color = Color(0, 0, 0, 255);
 		
@@ -93,14 +132,17 @@ public:
 		printing_delay = 0.05f;
 		// скорость анимации
 		anim_speed = 15;
+		alpha = act = 0;
 		
 		// обнуление строки текущей реплики
-		current_text = name_text = "";
+		current_text = name_text = act_number = "";
 		
 		// установка начальных значений булевым переменным
 		APPEARING = DISAPPEARING = false;
 		isActive = false;
-		thinking = speaking = false;
+		thinking = speaking = act_calculating = false;
+		interrogation = false;
+		help = true;
 		
 		// открытие сценария из текстового документа
 		script.open("Scripts/Script.txt");
@@ -178,6 +220,18 @@ void panel::update(bool notInventary){
 		(*current_person).isActive = !(*current_person).isActive;
 	}
 	
+	// отключение подсказки в виде иконки мыши
+	if(alpha > 1) help = false;
+	
+	if ((double)anim_clock.getElapsedTime().asMicroseconds() / 1000000 > 1) {
+		mouse_icon.setTextureRect(mouse_sprites[1]);
+		arrows.setTextureRect(arrows_sprites[0]);
+	}
+	else {
+		mouse_icon.setTextureRect(mouse_sprites[0]);
+		arrows.setTextureRect(arrows_sprites[1]);
+	}
+	
 	// вывод текста на диалоговую панель
 	if (printing) anim_text();
 	if (DISAPPEARING) anim_disappearing();
@@ -197,17 +251,26 @@ void panel::update(bool notInventary){
 	// обновление характеристик элементов интерфейса.
 	panel_shape.setPosition(bar_position);
 	
-	
 	panel_shape.setFillColor(Color(255, 255, 255, (char)alpha));
-	panel_shape.setOutlineColor(Color(0,0,0, (char)alpha));
-	current_speech.setFillColor(Color(0,0,0, (char)alpha));
-	person_name.setFillColor(Color(0,0,0, (char)alpha));
+	
+	if (interrogation) {
+		current_speech.setFillColor(Color(0, 100, 0, (char)alpha));
+		person_name.setFillColor(Color(0,100,0, (char)alpha));
+		panel_shape.setOutlineColor(Color(0,100,0, (char)alpha));
+	}
+	else {
+		current_speech.setFillColor(Color(0, 0, 0, (char)alpha));
+		person_name.setFillColor(Color(0,0,0, (char)alpha));
+		panel_shape.setOutlineColor(Color(0,0,0, (char)alpha));
+	}
 	
 	current_speech.setPosition(speech_position);
-	person_name.setPosition(name_position);
+	person_name.setPosition((*current_person).shape.getPosition().x, name_position.y);
 	
 	current_speech.setString(String::fromUtf8(current_text.begin(), current_text.end()));
 	person_name.setString(String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString());
+	
+	if ((double)anim_clock.getElapsedTime().asMicroseconds() / 1000000 >= 2) anim_clock.restart();
 }
 
 // функция отрисовки объектов.
@@ -216,6 +279,8 @@ void panel::render(){
 	window.draw(panel_shape);
 	window.draw(current_speech);
 	window.draw(person_name);
+	if (help) window.draw(mouse_icon);
+	if (!printing && alpha > 250) window.draw(arrows);
 }
 
 // разделение строки на отдельные подстроки с учётом определённых характеристик
@@ -223,16 +288,35 @@ void panel::parsing(string str){
 	script_text = name_text = "";
 	bool name = false;
 	for (int i = 0; i < str.length(); i++){
-		if (str[i] == '<') {
+		
+		if (str[i] == '{'){
+			act_number = "";
+			act_calculating = true;
+			continue;
+		}
+		else if (str[i] == '}'){
+			act_calculating = false;
+			act = stoi(act_number);
+			cout<<act<<'\n';
+			continue;
+		}
+		else if (str[i] == '<') {
 			name = true;
 			continue;
-		} else if (str[i] == '>') {
+		} 
+		else if (str[i] == '>') {
 			name = false;
 			continue;
 		}
-		if (name) name_text += str[i];
-		if (str[i] == '@') thinking = true;
-		if ((name == false) && (str[i] != '@')) script_text += str[i];
+		
+		if (act_calculating){
+			act_number += str[i];
+		}
+		else {
+			if (name) name_text += str[i];
+			if (str[i] == '@') thinking = true;
+			if ((name == false) && (str[i] != '@')) script_text += str[i];
+		}
 	}
 }
 
