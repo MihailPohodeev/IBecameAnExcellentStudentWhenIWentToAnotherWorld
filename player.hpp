@@ -1,4 +1,4 @@
-#include "sprites.hpp"
+#include "bar.hpp"
 
 class person{
 public:
@@ -16,7 +16,8 @@ public:
 	oldActive, // переменная для проверки изменения текущей активности персонажа
 	anim_playing,
 	isSitting, // сидит ли персонаж
-	printing; // печатается ли текст
+	printing, // печатается ли текст
+	isDizziness; // головокружение
 	
 	Vector2f shape_origin[2], // позиции игрока для анимирования
 	position;
@@ -25,7 +26,8 @@ public:
 	think[4], // позиции "раздумья" на атласе
 	siting_think[4], // позиции "раздумья сидя" на атсасе
 	writing[4], // анимация письма
-	idle_rect[2]; // позиции анимации "спокойствия" на атласе
+	idle_rect[2], // позиции анимации "спокойствия" на атласе
+	dizziness[2]; // позиции анимации головокружения
 	
 	Clock anim_clock;
 	
@@ -42,6 +44,8 @@ public:
 	void thinking();
 	void idle();
 	
+	void dizziness_anim(); // анимация головокружения
+	
 	void sitting_writing(); // анимация записи
 	void sitting_thinking(); // анимация размышления
 	
@@ -57,7 +61,7 @@ public:
 		
 		shape.setTexture(&think_txt);
 		
-		isSitting = false;
+		isSitting = isDizziness = false;
 		
 		moving_coefficient = 5;
 		
@@ -82,6 +86,9 @@ public:
 		writing[2] = IntRect(4, 235, 260, 208);
 		writing[3] = IntRect(518, 235, 260, 208);
 		
+		dizziness[0] = IntRect(0, 0, 260, 230);
+		dizziness[1] = IntRect(256, 0, 260, 230);
+		
 		shape_origin[0] = shape.getOrigin();
 		shape_origin[1] = Vector2f(shape.getOrigin().x + moving_coefficient, shape.getOrigin().y);
 		
@@ -92,6 +99,7 @@ public:
 	
 };
 
+// обновление
 void person::update(){
 	
 	if (!isSitting){
@@ -101,6 +109,7 @@ void person::update(){
 	}
 	else {
 		if(isThinking) sitting_thinking();
+		if (isDizziness) dizziness_anim();
 	}
 
 	if (isActive != oldActive) anim_playing = true;
@@ -143,6 +152,7 @@ inline void person::setPosition(Vector2f pos) {
 	shape.setPosition(pos);
 }
 
+// анимация спокойствия
 void person::idle(){
 	if ((double)anim_clock.getElapsedTime().asMilliseconds() / 1000 > 1.f) {
 		anim_clock.restart();
@@ -173,7 +183,18 @@ void person::sitting_writing(){
 	shape.setTextureRect(writing[(int)((double)anim_clock.getElapsedTime().asMilliseconds() / 1000 / 0.25f)]);
 	shape.setSize(Vector2f(WIDTH / 2, HEIGHT / 1.5f));	
 	shape.setOrigin(Vector2f(shape.getSize().x / 3, shape.getSize().y));
-	if ((int)((double)anim_clock.getElapsedTime().asMilliseconds() / 1000 / 0.25f) == 5) cout<<"Problem!"<<'\n';
+}
+
+// анимация головокружения
+void person::dizziness_anim(){
+	if ((double)anim_clock.getElapsedTime().asMilliseconds() / 1000 > 1.f) {
+		anim_clock.restart();
+	}
+	
+	shape.setTexture(&sitting);
+	shape.setTextureRect(dizziness[(int)((double)anim_clock.getElapsedTime().asMilliseconds() / 1000 / 0.5f)]);
+	shape.setSize(Vector2f(WIDTH / 2, HEIGHT / 1.5f));	
+	shape.setOrigin(Vector2f(shape.getSize().x / 3, shape.getSize().y));
 }
 
 

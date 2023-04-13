@@ -350,7 +350,8 @@ void panel::parsing(string str){
 		else {
 			if (name) name_text += str[i];
 			if (str[i] == '@') thinking = true;
-			if ((name == false) && (str[i] != '@')) script_text += str[i];
+			if (str[i] == '%') (*current_person).isDizziness = true;
+			if ((name == false) && (str[i] != '@') && (str[i] != '%')) script_text += str[i];
 		}
 	}
 }

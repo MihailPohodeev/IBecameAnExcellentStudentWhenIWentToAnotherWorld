@@ -317,5 +317,37 @@ namespace constructor{
 				left = true;
 			}
 		}
-	}	
+	}
+	
+	void level2(){
+		
+		level2_nmspc::main_player hero;
+		level2_nmspc::dialog_bar bar;
+		
+		while (window.isOpen())
+	    {
+	        clock.restart();
+	        
+			Event event;
+	        while (window.pollEvent(event))
+	        {
+	            if (event.type == sf::Event::Closed)
+	                window.close();
+	        }
+	        
+	        hero.update();
+	        bar.update();
+	        
+	        window.clear();
+	        hero.render();
+	        bar.render();
+	        window.display();
+	        
+	        
+	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
+		}
+		
+		
+		
+	}
 }
