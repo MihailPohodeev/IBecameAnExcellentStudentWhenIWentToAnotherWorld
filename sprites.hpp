@@ -1,4 +1,4 @@
-#include "inventory.hpp"
+#include "scene_menu.hpp"
 
 namespace level2_nmspc{
 	

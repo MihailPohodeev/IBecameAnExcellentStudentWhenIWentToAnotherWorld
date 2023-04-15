@@ -22,7 +22,8 @@ double thick_size = (WIDTH + HEIGHT)/ 300; // размер контура
 
 int current_act = 0; // номер акта
 
-bool start_game = false; // начата ли игра
+bool level1_start = false; // начата ли игра
+bool level2_start = false; // начата ли игра
 bool to_settings = false; // переход к настройкам
 
 Vector2i mouse_position; // позиция мыши

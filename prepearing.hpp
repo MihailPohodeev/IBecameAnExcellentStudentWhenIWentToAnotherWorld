@@ -70,7 +70,7 @@ namespace constructor{
 	        	if (!startIsClick){
 	        		title.setString("ЗАГРУЗКА...");
 	        		title.setOrigin(Vector2f(((string)title.getString().toAnsiString()).length() * title.getCharacterSize() / 4.f, title.getCharacterSize() / 2));
-		        	start_game = true;
+		        	level1_start = true;
 		        	anim = !anim;
 		        	startIsClick = true;
 				}
@@ -94,7 +94,7 @@ namespace constructor{
 				break;
 			}
 			
-			if (start_game && !exit.isActive && exit.alpha == 0){
+			if (level1_start && !exit.isActive && exit.alpha == 0){
 				break;
 			}
 	        
@@ -323,6 +323,7 @@ namespace constructor{
 		
 		level2_nmspc::main_player hero;
 		level2_nmspc::dialog_bar bar;
+		scene_menu sceneMenu;
 		
 		RectangleShape background; // форма заднего фона
 		
@@ -332,7 +333,7 @@ namespace constructor{
 		background_init(background_image, background);
 		
 		
-		while (window.isOpen())
+		while (window.isOpen() && level1_start)
 	    {
 	        clock.restart();
 	        
@@ -343,21 +344,39 @@ namespace constructor{
 	                window.close();
 	        }
 	        
-	        if (Mouse::isButtonPressed(Mouse::Left)){
+	        mouse_position = Mouse::getPosition(window);
+	        
+	        if (!hero.stand && Mouse::isButtonPressed(Mouse::Left)){
 	        	hero.anim_timer.restart();
 	        	hero.stand = true;
 			}
+			if (hero.standing && hero.stand && (current_act == 0)){
+				bar.isActive = true;
+			}
 	        
-	        hero.update();
-	        bar.update();
+
+	        
+			
+			
+			
+			
+			if(!sceneMenu.isActive){
+				hero.update();
+		        bar.update();
+	    	}
+	    	
+	    	sceneMenu.update();
+	        
 	        
 	        window.clear();
 	        window.setView(view);
 	        window.draw(background);
 	        hero.render();
 	        bar.render();
+	        sceneMenu.render();
 	        window.display();
 	        
+
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
 		}
