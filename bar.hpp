@@ -11,6 +11,7 @@ namespace level2_nmspc{
 		
 		double alpha; // степень прозрачности панели
 		double x, y; // координаты панели
+		double speed; // скорость анимации
 		
 		fstream script; // поток сценария
 		
@@ -22,16 +23,19 @@ namespace level2_nmspc{
 		void render(); // отрисовка
 		
 		dialog_bar(){
-			shape.setSize(Vector2f(WIDTH * 0.95, HEIGHT * 0.2));
-			shape.setOrigin(Vector2f(shape.getSize().x / 2, shape.getSize().y));
-			shape.setFillColor(Color(255, 255, 255, 0));
-			shape.setOutlineColor(Color(0, 0, 0, 0));
+			shape.setSize(Vector2f(WIDTH - 2 * (thick_size), HEIGHT * 0.2));
+			shape.setOrigin(Vector2f(shape.getSize().x / 2, 0));
+			shape.setFillColor(Color(255, 255, 255, 255));
+			shape.setOutlineColor(Color(0, 0, 0, 255));
 			shape.setOutlineThickness(thick_size);
+			shape.setPosition(WIDTH / 2, HEIGHT + thick_size);
 			
 			x = WIDTH / 2;
 			y = HEIGHT - (WIDTH - shape.getSize().x) / 2;
 			
-			isActive = false;
+			speed = 100;
+			
+			isActive = true;
 			isPrinting = false;
 			
 			script.open("Scripts/Script2.txt");
@@ -43,9 +47,11 @@ namespace level2_nmspc{
 	void dialog_bar::update(){
 		if (isActive){
 			// анимация появления панели
-			if (alpha < 255){
-				alpha += anim_speed * 20 * deltaTime;
-				if (alpha > 255) alpha = 255;
+			if (view.getCenter().y < HEIGHT / 2 + shape.getSize().y + 2 * thick_size){
+				view.move(0, speed * deltaTime);
+				if (view.getCenter().y > HEIGHT / 2 + shape.getSize().y){
+					view.setCenter(Vector2f(WIDTH / 2, HEIGHT / 2 + shape.getSize().y + 2 * thick_size));
+				}
 			}
 			else{
 				if (!isPrinting){
@@ -58,15 +64,15 @@ namespace level2_nmspc{
 			}
 		}
 		else {
-			if (alpha > 0){
-				alpha -= anim_speed * 20 * deltaTime;
-				if (alpha < 0) alpha = 0;
+			if (view.getCenter().y > HEIGHT / 2){
+				view.move(0, - speed * deltaTime);
+				if (view.getCenter().y < HEIGHT / 2){
+					view.setCenter(Vector2f(WIDTH / 2, HEIGHT / 2));
+				}
 			}
 		}
 		
-		shape.setFillColor(Color(255, 255, 255, (char)alpha));
-		shape.setOutlineColor(Color(0, 0, 0, (char)alpha));
-		shape.setPosition(x, y);
+		if (Keyboard::isKeyPressed((Keyboard::Q))) isActive = !isActive;
 	}
 	
 	// отрисовка

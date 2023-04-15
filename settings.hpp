@@ -11,14 +11,16 @@ using namespace std;
 using namespace sf;
 
 // глобальные переменные размера экрана.
-int WIDTH = VideoMode::getDesktopMode().width;
-int HEIGHT = VideoMode::getDesktopMode().height;
-//int WIDTH = 683;
-//int HEIGHT = 384;
+//int WIDTH = VideoMode::getDesktopMode().width;
+//int HEIGHT = VideoMode::getDesktopMode().height;
+int WIDTH = 683;
+int HEIGHT = 384;
 
 double deltaTime = 0; // глобальная переменная времени.
 double anim_speed = 15.f; // скорость проигрывания анимаций
 double thick_size = (WIDTH + HEIGHT)/ 300; // размер контура
+
+int current_act = 0; // номер акта
 
 bool start_game = false; // начата ли игра
 bool to_settings = false; // переход к настройкам
@@ -28,7 +30,7 @@ Font main_font; // основной шрифт игры
 Color main_color = Color(255, 255, 255, 255); // главный цвет игры.
 
 // создание окна
-RenderWindow window(VideoMode(WIDTH, HEIGHT), "I became an excelent student when I visited another world", Style::Fullscreen);
+RenderWindow window(VideoMode(WIDTH, HEIGHT), "I became an excelent student when I visited another world");
 
 View view(FloatRect(0.f, 0.f, WIDTH, HEIGHT));
 

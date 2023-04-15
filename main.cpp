@@ -10,8 +10,8 @@ int main()
 //	    constructor::menu();
 //	    if (to_settings) constructor::settings();
 //	    if (start_game) constructor::game();
-//		constructor::level2();
-		constructor::game();
+		constructor::level2();
+//		constructor::game();
 	}
 	
     return 0;

@@ -324,6 +324,14 @@ namespace constructor{
 		level2_nmspc::main_player hero;
 		level2_nmspc::dialog_bar bar;
 		
+		RectangleShape background; // форма заднего фона
+		
+		Texture background_image;
+		background_image.loadFromFile("Sprites/background2.jpg");
+		
+		background_init(background_image, background);
+		
+		
 		while (window.isOpen())
 	    {
 	        clock.restart();
@@ -335,10 +343,17 @@ namespace constructor{
 	                window.close();
 	        }
 	        
+	        if (Mouse::isButtonPressed(Mouse::Left)){
+	        	hero.anim_timer.restart();
+	        	hero.stand = true;
+			}
+	        
 	        hero.update();
 	        bar.update();
 	        
 	        window.clear();
+	        window.setView(view);
+	        window.draw(background);
 	        hero.render();
 	        bar.render();
 	        window.display();
