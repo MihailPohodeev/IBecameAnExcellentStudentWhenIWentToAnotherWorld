@@ -321,13 +321,15 @@ namespace constructor{
 	
 	void level2(){
 		
+		current_act = 0;
+		
+		// таймер событый
 		Clock event_timer;
 		double event_time;
 		
-		string hint_text = "для перемещения персонажа используйте клавиши W,A,S,D.";
-		
+		// текст подсказок
+		string hint_text = "";
 		int text_size = (HEIGHT + WIDTH) / 2 * 0.025f;
-		
 		Text hint;
 		hint.setFont(main_font);
 		hint.setCharacterSize(text_size);
@@ -337,11 +339,22 @@ namespace constructor{
 		hint.setOutlineColor(Color(0, 0, 0, 255));
 		hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
 		
+		// триггер удостоверения личности
 		trigger identity_card = trigger(WIDTH / 8, HEIGHT / 10);
 		identity_card.setPosition(WIDTH * 0.8f, HEIGHT * 0.6f);
 		
+		trigger window_view = trigger(WIDTH / 4, HEIGHT / 10);
+		window_view.setPosition(WIDTH / 2, HEIGHT / 2);
+		
+		// объект персонажа и диалоговой панели
 		level2_nmspc::main_player hero;
 		level2_nmspc::dialog_bar bar;
+		
+		inventory _inventory; // инвентарь
+		
+		hero.movement = false;
+		
+		// меню
 		scene_menu sceneMenu;
 		
 		RectangleShape background; // форма заднего фона
@@ -373,27 +386,88 @@ namespace constructor{
 			}
 			
 			
+			
+			// ОБРАБОТКА СОБЫТИЙ
 			if (hero.standing && hero.stand && (bar.script_act == 0)){
 				bar.isActive = true;
 				event_timer.restart();
 			}
-			else if ((bar.script_act == 1) && (identity_card.intersects(hero.collision_rect))){
-				hint_text = "для взаимодействия нажмите клавишу E";
-				hint.setString(hint_text);
-				hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+			else if (bar.script_act == 1){
+
+				if ((event_time < 5.f) && current_act == 0){
+					hint_text = "для перемещения персонажа используйте клавиши W,A,S,D.";
+					hint.setString(hint_text);
+					hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+				}
+				else{
+					hint.setString("");
+				}
+				
+				if (identity_card.intersects(hero.collision_rect) && (current_act == 0)){
+					hint_text = "для взаимодействия нажмите клавишу E";
+					hint.setString(hint_text);
+					hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+					if(Keyboard::isKeyPressed(Keyboard::E)){
+						current_act = 1;
+					}
+				}
+				
+				hero.movement = true;
+				if(current_act == 1) {
+					bar.isActive = true;
+					hero.movement = false;
+					event_timer.restart();
+				}
+				else {
+					bar.isActive = false;
+				}
+				
 			}
-			else {
-				if ((event_time < 5.f) && (bar.script_act == 1)){
-					hint.setString("для перемещения персонажа используйте клавиши W,A,S,D.");
+			else if (bar.script_act == 2){
+				
+				_inventory.trigger_notification("Добавлено: Удостоверение личности");
+				
+				if ((event_time < 5.f)){
+					hint_text = "чтобы открыть инвентарь, нажмите клавишу Q.";
+					hint.setString(hint_text);
 					hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
 				}
 				else hint.setString("");
-				bar.isActive = false;
+				
+				if (window_view.intersects(hero.collision_rect) && (current_act == 1)){
+					hint_text = "для взаимодействия нажмите клавишу E";
+					hint.setString(hint_text);
+					hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+					
+					if (Keyboard::isKeyPressed(Keyboard::E)){
+						current_act = 2;
+					}
+				}
+				
+				hero.movement = true;
+				if(current_act == 2) {
+					bar.isActive = true;
+					hero.movement = false;
+				}
+				else {
+					bar.isActive = false;
+				}
 			}
+			
+			else if (bar.script_act == 3){
+				hero.movement = false;
+			}
+			
+			
+			
+			
+			
 			
 			if(!sceneMenu.isActive){
 				hero.update();
 		        bar.update();
+		        _inventory.update();
+		        if(bar.isActive) _inventory.isActive = false;
 	    	}
 	    	
 	    	sceneMenu.update();
@@ -406,6 +480,8 @@ namespace constructor{
 	        window.draw(hint);
 	        bar.render();
 			identity_card.render();
+			window_view.render();
+			_inventory.render();
 	        sceneMenu.render();
 	        window.display();
 	        

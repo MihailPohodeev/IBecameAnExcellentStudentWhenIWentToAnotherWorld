@@ -105,7 +105,6 @@ namespace level2_nmspc{
 						delta_time_text_animation = 0.05f;
 						getline(script, script_text);
 						parsing(script_text);
-						cout<<current_speech<<'\n';
 						name.setString(name_character);
 						isPrinting = true;
 					}
@@ -184,16 +183,16 @@ namespace level2_nmspc{
 		static Clock text_animation_timer;
 		double text_animation_time = (double)text_animation_timer.getElapsedTime().asMilliseconds() / 1000;
 		
+		if(current_speech_animated.length() >= str.length()){
+			index = 0;
+			isPrinting = false;
+		}
+		
 		if (text_animation_time > delta_time_text_animation){
 			current_speech_animated += str[index];
 			index++;
 			text_animation_timer.restart();
-		}
-		
-		if(current_speech_animated.length() == str.length()){
-			index = 0;
-			isPrinting = false;
-		}
+		}		
 	}
 	
 	// отрисовка

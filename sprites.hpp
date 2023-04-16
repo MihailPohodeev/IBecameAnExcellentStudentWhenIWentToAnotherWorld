@@ -26,6 +26,8 @@ namespace level2_nmspc{
 		
 	public:
 		
+		bool movement; // доступно ли движение
+		
 		FloatRect collision_rect;
 		
 		void _update(); // обновление
@@ -43,8 +45,9 @@ namespace level2_nmspc{
 			x = WIDTH * 0.5f;
 			y = HEIGHT * 0.8f;
 			speed = WIDTH / 6.5f;
+			movement = true;
 			
-			up_barrier = HEIGHT * 2 / 3;
+			up_barrier = HEIGHT / 4;
 			down_barrier = HEIGHT;
 			right_barrier = WIDTH;
 			left_barrier = 0;
@@ -54,29 +57,31 @@ namespace level2_nmspc{
 	
 	// обновление
 	void character::_update(){
-		if (dir == RIGHT){
-			if (x < right_barrier){
-				x += speed * deltaTime;
+		if (movement){
+			if (dir == RIGHT){
+				if (x < right_barrier){
+					x += speed * deltaTime;
+				}
+				last_dir = RIGHT;
 			}
-			last_dir = RIGHT;
-		}
-		else if (dir == LEFT){
-			if (x > left_barrier){
-				x -= speed * deltaTime;
+			else if (dir == LEFT){
+				if (x > left_barrier){
+					x -= speed * deltaTime;
+				}
+				last_dir = LEFT;
 			}
-			last_dir = LEFT;
-		}
-		else if (dir == UP){
-			if (y > up_barrier){
-				y -= speed * deltaTime;
+			else if (dir == UP){
+				if (y > up_barrier){
+					y -= speed * deltaTime;
+				}
+				last_dir = UP;
 			}
-			last_dir = UP;
-		}
-		else if (dir == DOWN){
-			if (y < down_barrier){
-				y += speed * deltaTime;
+			else if (dir == DOWN){
+				if (y < down_barrier){
+					y += speed * deltaTime;
+				}
+				last_dir = DOWN;
 			}
-			last_dir = DOWN;
 		}
 		
 		collision_rect = collider.getGlobalBounds();
@@ -174,7 +179,7 @@ namespace level2_nmspc{
 	};
 	
 	void main_player::update(){
-		if (standing){
+		if (standing && movement){
 			if (Keyboard::isKeyPressed(Keyboard::W)){
 				dir = UP;
 			}
@@ -215,17 +220,22 @@ namespace level2_nmspc{
 			}
 		}
 		else if(standing){
-			if (dir == LEFT){
-				shape.setTextureRect(left_walking[(int)(anim_time * 6)]);
-			}
-			else if(dir == RIGHT){
-				shape.setTextureRect(right_walking[(int)(anim_time * 6)]);
-			}
-			else if (dir == UP){
-				shape.setTextureRect(up_walking[(int)(anim_time * 6)]);
-			}
-			else if (dir == DOWN){
-				shape.setTextureRect(down_walking[(int)(anim_time * 6)]);
+			if (movement){
+				if (dir == LEFT){
+					shape.setTextureRect(left_walking[(int)(anim_time * 6)]);
+				}
+				else if(dir == RIGHT){
+					shape.setTextureRect(right_walking[(int)(anim_time * 6)]);
+				}
+				else if (dir == UP){
+					shape.setTextureRect(up_walking[(int)(anim_time * 6)]);
+				}
+				else if (dir == DOWN){
+					shape.setTextureRect(down_walking[(int)(anim_time * 6)]);
+				}
+				else{
+					shape.setTextureRect(idle[last_dir - 1]);
+				}
 			}
 			else{
 				shape.setTextureRect(idle[last_dir - 1]);
