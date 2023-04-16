@@ -321,6 +321,25 @@ namespace constructor{
 	
 	void level2(){
 		
+		Clock event_timer;
+		double event_time;
+		
+		string hint_text = "для перемещения персонажа используйте клавиши W,A,S,D.";
+		
+		int text_size = (HEIGHT + WIDTH) / 2 * 0.025f;
+		
+		Text hint;
+		hint.setFont(main_font);
+		hint.setCharacterSize(text_size);
+		hint.setString(hint_text);
+		hint.setFillColor(Color(255, 255, 255, 255));
+		hint.setOutlineThickness(thick_size / 2);
+		hint.setOutlineColor(Color(0, 0, 0, 255));
+		hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+		
+		trigger identity_card = trigger(WIDTH / 8, HEIGHT / 10);
+		identity_card.setPosition(WIDTH * 0.8f, HEIGHT * 0.6f);
+		
 		level2_nmspc::main_player hero;
 		level2_nmspc::dialog_bar bar;
 		scene_menu sceneMenu;
@@ -344,21 +363,33 @@ namespace constructor{
 	                window.close();
 	        }
 	        
-	        mouse_position = Mouse::getPosition(window);
+	        // получить координаты мыши
+	        mouse_position = Vector2i(Mouse::getPosition(window).x + view.getCenter().x - WIDTH / 2, Mouse::getPosition(window).y + view.getCenter().y - HEIGHT / 2);
+	        event_time = (double)event_timer.getElapsedTime().asMilliseconds() / 1000;
 	        
 	        if (!hero.stand && Mouse::isButtonPressed(Mouse::Left)){
 	        	hero.anim_timer.restart();
 	        	hero.stand = true;
 			}
-			if (hero.standing && hero.stand && (current_act == 0)){
+			
+			
+			if (hero.standing && hero.stand && (bar.script_act == 0)){
 				bar.isActive = true;
+				event_timer.restart();
 			}
-	        
-
-	        
-			
-			
-			
+			else if ((bar.script_act == 1) && (identity_card.intersects(hero.collision_rect))){
+				hint_text = "для взаимодействия нажмите клавишу E";
+				hint.setString(hint_text);
+				hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+			}
+			else {
+				if ((event_time < 5.f) && (bar.script_act == 1)){
+					hint.setString("для перемещения персонажа используйте клавиши W,A,S,D.");
+					hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+				}
+				else hint.setString("");
+				bar.isActive = false;
+			}
 			
 			if(!sceneMenu.isActive){
 				hero.update();
@@ -372,7 +403,9 @@ namespace constructor{
 	        window.setView(view);
 	        window.draw(background);
 	        hero.render();
+	        window.draw(hint);
 	        bar.render();
+			identity_card.render();
 	        sceneMenu.render();
 	        window.display();
 	        
@@ -380,8 +413,24 @@ namespace constructor{
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
 		}
-		
-		
-		
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

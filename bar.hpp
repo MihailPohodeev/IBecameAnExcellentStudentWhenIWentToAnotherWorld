@@ -16,14 +16,17 @@ namespace level2_nmspc{
 		double alpha; // степень прозрачности панели
 		double x, y; // координаты панели
 		double speed; // скорость анимации
+		double delta_time_text_animation; // время для набора одной буквы
 		
 		fstream script; // поток сценария
 		
 		string script_text; // строка сценария
 		string current_speech; // текущая речь персонажа
 		string name_character; // имя персонажа
+		string current_speech_animated; // анимированный текст текущей речи
 		
 		void parsing(string str); // парсер сценария
+		void text_animation(string str); // анимация набора сценария
 		
 	public:
 		
@@ -31,6 +34,8 @@ namespace level2_nmspc{
 		
 		void update(); // обновление
 		void render(); // отрисовка
+		
+		int script_act;
 		
 		
 		dialog_bar(){
@@ -52,7 +57,7 @@ namespace level2_nmspc{
 			name.setFillColor(Color(0, 0, 0, 255));
 			name.setCharacterSize((HEIGHT + WIDTH) / 2 * 0.016f);
 			name.setPosition(name_shape.getPosition().x, name_shape.getPosition().y);
-			name.setString("Name");
+			name.setString("виктор");
 			
 			speech.setFont(main_font);
 			speech.setFillColor(Color(0, 0, 0, 255));
@@ -62,7 +67,10 @@ namespace level2_nmspc{
 			x = WIDTH / 2;
 			y = HEIGHT - (WIDTH - shape.getSize().x) / 2;
 			
+			script_act = 0;
+			
 			speed = WIDTH / 4.f;
+			delta_time_text_animation = 0.05f;
 			
 			isClick = false;
 			isActive = false;
@@ -74,6 +82,7 @@ namespace level2_nmspc{
 		}	
 	};
 	
+	// обновление
 	void dialog_bar::update(){
 		
 		if (isActive){
@@ -88,30 +97,34 @@ namespace level2_nmspc{
 					view.setCenter(Vector2f(WIDTH / 2, HEIGHT / 2 + shape.getSize().y + 2 * thick_size + 0.001f));
 				}
 			}
-			else{
-				
-				if(Mouse::isButtonPressed(Mouse::Left)){
-					if (!isClick){
-						if (!isPrinting){
-							name_character = current_speech = "";
-							getline(script, script_text);
-							parsing(script_text);
-							cout<<current_speech<<'\n';
-							name.setString(name_character);
-							speech.setString(current_speech);
-//							isPrinting = true;
-						}
-						else{
-						isPrinting = false;
-						}
+			
+			if(Mouse::isButtonPressed(Mouse::Left)){
+				if (!isClick){
+					if (!isPrinting){
+						name_character = current_speech = current_speech_animated = "";
+						delta_time_text_animation = 0.05f;
+						getline(script, script_text);
+						parsing(script_text);
+						cout<<current_speech<<'\n';
+						name.setString(name_character);
+						isPrinting = true;
 					}
-					isClick = true;
+					else{
+						delta_time_text_animation = 0.02f;
+					}
 				}
-				else{
-					isClick = false;
-				}
-				
+				isClick = true;
 			}
+			else{
+				isClick = false;
+			}
+			
+			if (isPrinting){
+				text_animation(current_speech);
+				speech.setString(current_speech_animated);
+			}
+				
+			
 		}
 		else {
 			// анимация исчезновения диалоговой панели
@@ -127,13 +140,13 @@ namespace level2_nmspc{
 				name.move(0, speed / 4 * deltaTime);
 			}
 		}
-		
-		if (Keyboard::isKeyPressed((Keyboard::Q))) isActive = !isActive;
 	}
 	
 	// парсер сценария
 	void dialog_bar::parsing(string str){
 		bool name = false;
+		bool action = false;
+		string action_str = "";
 		for(int i = 0; i < str.length(); i++){
 			if (str[i] == '<') {
 				name = true;
@@ -146,9 +159,40 @@ namespace level2_nmspc{
 			else if (str[i] == '@'){
 				continue;
 			}
+			else if (str[i] == '['){
+				action = true;
+				continue;
+			}
+			else if (str[i] == ']'){
+				script_act = stoi(action_str);
+				action_str = "";
+				action = false;
+				continue;
+			}
 			
 			if (name) name_character += str[i];
+			else if (action){
+				action_str += str[i];
+			}
 			else current_speech += str[i];
+		}
+	}
+	
+	// анимация набора текста
+	void dialog_bar::text_animation(string str){
+		static int index = 0;
+		static Clock text_animation_timer;
+		double text_animation_time = (double)text_animation_timer.getElapsedTime().asMilliseconds() / 1000;
+		
+		if (text_animation_time > delta_time_text_animation){
+			current_speech_animated += str[index];
+			index++;
+			text_animation_timer.restart();
+		}
+		
+		if(current_speech_animated.length() == str.length()){
+			index = 0;
+			isPrinting = false;
 		}
 	}
 	

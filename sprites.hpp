@@ -8,6 +8,7 @@ namespace level2_nmspc{
 		
 		// форма персонажа
 		RectangleShape shape;
+		RectangleShape collider;
 		
 		// имя персонажа
 		string name;
@@ -25,12 +26,18 @@ namespace level2_nmspc{
 		
 	public:
 		
+		FloatRect collision_rect;
+		
 		void _update(); // обновление
 		void render(); // отрисовка
 		
 		character(){
 			shape.setSize(Vector2f(WIDTH / 8, HEIGHT / 3));
 			shape.setOrigin(Vector2f(shape.getSize().x / 2, shape.getSize().y));
+			
+			collider.setSize(Vector2f(shape.getSize().x, shape.getSize().y / 10));
+			collider.setOrigin(Vector2f(collider.getSize().x / 2, collider.getSize().y));
+			
 			dir = STOP;
 			last_dir = LEFT;
 			x = WIDTH * 0.5f;
@@ -72,12 +79,16 @@ namespace level2_nmspc{
 			last_dir = DOWN;
 		}
 		
+		collision_rect = collider.getGlobalBounds();
+		
 		shape.setPosition(x, y);
+		collider.setPosition(x, y);
 	}
 	
 	// отрисовка
 	void character::render(){
 		window.draw(shape);
+		if (debugging) window.draw(collider);
 	}
 	
 	
@@ -198,6 +209,9 @@ namespace level2_nmspc{
 				standing = true;
 				shape.setSize(Vector2f(WIDTH / 8, HEIGHT / 3));
 				shape.setOrigin(Vector2f(shape.getSize().x / 2, shape.getSize().y));
+				
+				collider.setSize(Vector2f(shape.getSize().x / 2, shape.getSize().y / 10));
+				collider.setOrigin(Vector2f(collider.getSize().x / 2, collider.getSize().y));
 			}
 		}
 		else if(standing){

@@ -1,4 +1,4 @@
-#include "drop_menu.hpp"
+#include "trigger.hpp"
 
 // класс €чейки инвентар€
 class slot{
