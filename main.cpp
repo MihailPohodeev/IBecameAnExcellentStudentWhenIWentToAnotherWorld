@@ -44,8 +44,8 @@ int main()
 		view.setCenter(Vector2f(WIDTH / 2, HEIGHT / 2));
 //	    constructor::menu();
 //	    if (to_settings) constructor::settings();
-//	  	if (level1_start) constructor::game();
-		if (level1_start) constructor::level2();
+	  	if (level1_start) constructor::level1();
+		if (level2_start) constructor::level2();
 //		constructor::level2();
 	}
 	

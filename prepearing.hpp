@@ -42,8 +42,6 @@ namespace constructor{
 		Texture back_texture;
 	    RectangleShape background;
 	    back_texture.loadFromFile("Sprites/background.jpg");
-	    if (!back_texture.loadFromFile("Sprites/background.jpg")) cout<<"background picture loading failed"<<'\n';
-	    else cout<<"background picture loaded succsessfully"<<'\n';
 	    
 	    // масштабирование заднего фона
     	background_init(back_texture, background);
@@ -167,7 +165,7 @@ namespace constructor{
 	    
 	    // выпадающее меню для разрешения экрана
 	    drop_down_menu screen;
-	    screen.setPosition(Vector2f(WIDTH * 5/8, HEIGHT / 5));
+	    screen.setPosition(Vector2f(WIDTH * 5 / 8, HEIGHT / 5));
 	    
 	    // масштабирование заднего фона
     	background_init(back_texture, background);
@@ -216,7 +214,7 @@ namespace constructor{
 	
 	
 	// метод процесса игры
-	void game(){
+	void level1(){
 		
 		panel main_bar; // панель диалогов
 		inventory invent; // инвентарь
@@ -225,6 +223,35 @@ namespace constructor{
 		double fps = 0;
 		int old_act = main_bar.act;
 	
+		person character[4];
+		
+		character[0].name = "виктор";
+		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
+		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
+		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
+		character[0].setPosition(main_bar.current_left_positoin);
+		
+		character[1].name = "дима";
+		character[1].setPosition(main_bar.current_right_positoin);
+		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
+		character[1].say[0] = IntRect(42, 11, 120, 245);
+		character[1].say[1] = IntRect(182, 11, 120, 245);
+		character[1].idle_rect[0] = IntRect(332, 11, 120, 245);
+		character[1].idle_rect[1] = IntRect(42, 11, 120, 245);
+		
+		character[2].name = "элеонора";
+		character[2].setPosition(main_bar.current_right_positoin);
+		character[2].say_txt.loadFromFile("Sprites/eleonora_atlas.png");
+		character[2].say[0] = IntRect(26, 0, 162, 245);
+		character[2].say[1] = IntRect(190, 0, 162, 245);
+		character[2].idle_rect[0] = IntRect(360, 0, 162, 245);
+		character[2].idle_rect[1] = IntRect(530, 0, 162, 245);
+		
+		character[3].name = "преподаватель";
+		character[3].setPosition(main_bar.current_right_positoin);
+		
+		(main_bar.current_person) = &character[0];
+		
 		
 		Texture back_texture; // текстура заднего фона в корридоре
 		Texture classroom_texture; // текстура заднего фона в аудитории
@@ -244,10 +271,10 @@ namespace constructor{
 	    fps_text.setCharacterSize(14);
 	    
 	    // масштабирование заднего фона
-	    background_init(back_texture, background);
+	    background_init(black, background);
 //	    window.setFramerateLimit(60);
 	    
-		while (window.isOpen())
+		while (window.isOpen() && level1_start)
 	    {
 	        clock.restart();
 	        
@@ -258,11 +285,10 @@ namespace constructor{
 	                window.close();
 	        }
 			
-			
 			// получение позиции мыши
 			mouse_position = Mouse::getPosition(window);
 			
-			main_bar.update(invent.isActive);
+			main_bar.update(invent.isActive, character, 4);
 			invent.update();
 			background_movement(background);
 			
@@ -272,15 +298,21 @@ namespace constructor{
 				// исчезновение панели диалогов
 				main_bar.DISAPPEARING = true;
 			}
+			
+			cout<<main_bar.act<<'\n';
+			
 			if ((main_bar.dark_alpha >= 254) && (main_bar.act > 0) && (!main_bar.isActive)){
 				if (main_bar.act == 1) background_init(back_texture, background);
 				else if (main_bar.act == 2) {
 					background_init(classroom_texture, background);
-					for (int i = 0; i < 3; i++) main_bar.character[i].isSitting = true;
+					for (int i = 0; i < 3; i++) character[i].isSitting = true;
+				}
+				else if (main_bar.act == 3){
+					level1_start = false;
+					level2_start = true;
 				}
 				main_bar.isDark = false;
 			}
-			
 	        window.clear();
 	        window.setView(view);
 	        window.draw(background);
@@ -321,11 +353,13 @@ namespace constructor{
 	
 	void level2(){
 		
+		// текущий акт
 		current_act = 0;
 		
 		// таймер событый
 		Clock event_timer;
 		double event_time;
+		double alpha = 0; // степень затемнения экрана
 		
 		// текст подсказок
 		string hint_text = "";
@@ -347,25 +381,32 @@ namespace constructor{
 		window_view.setPosition(WIDTH / 2, HEIGHT / 2);
 		
 		// объект персонажа и диалоговой панели
-		level2_nmspc::main_player hero;
-		level2_nmspc::dialog_bar bar;
-		
+		level2_nmspc::main_player hero; // персонаж
+		level2_nmspc::dialog_bar bar; // диалоговое окно
 		inventory _inventory; // инвентарь
+		scene_menu sceneMenu; // меню
 		
 		hero.movement = false;
+		bool cutscene = false;
 		
-		// меню
-		scene_menu sceneMenu;
-		
+		// настройка заднего фона
 		RectangleShape background; // форма заднего фона
+		RectangleShape dark_front; // форма для затемнения экрана
+		
+		dark_front.setSize(Vector2f(WIDTH, HEIGHT * 1.5f));
+		dark_front.setPosition(0, 0);
+		dark_front.setFillColor(Color(0, 0, 0, 0));
 		
 		Texture background_image;
+		Texture window_view_image;
+		
 		background_image.loadFromFile("Sprites/background2.jpg");
+		window_view_image.loadFromFile("Sprites/window_view.png");
 		
 		background_init(background_image, background);
 		
 		
-		while (window.isOpen() && level1_start)
+		while (window.isOpen() && level2_start)
 	    {
 	        clock.restart();
 	        
@@ -380,7 +421,7 @@ namespace constructor{
 	        mouse_position = Vector2i(Mouse::getPosition(window).x + view.getCenter().x - WIDTH / 2, Mouse::getPosition(window).y + view.getCenter().y - HEIGHT / 2);
 	        event_time = (double)event_timer.getElapsedTime().asMilliseconds() / 1000;
 	        
-	        if (!hero.stand && Mouse::isButtonPressed(Mouse::Left)){
+	        if (!hero.stand && (Mouse::isButtonPressed(Mouse::Left)) || Joystick::isButtonPressed(0, 1)){
 	        	hero.anim_timer.restart();
 	        	hero.stand = true;
 			}
@@ -392,6 +433,7 @@ namespace constructor{
 				bar.isActive = true;
 				event_timer.restart();
 			}
+			// акт 1
 			else if (bar.script_act == 1){
 
 				if ((event_time < 5.f) && current_act == 0){
@@ -407,7 +449,7 @@ namespace constructor{
 					hint_text = "для взаимодействия нажмите клавишу E";
 					hint.setString(hint_text);
 					hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
-					if(Keyboard::isKeyPressed(Keyboard::E)){
+					if(Keyboard::isKeyPressed(Keyboard::E) || Joystick::isButtonPressed(0, 1)){
 						current_act = 1;
 					}
 				}
@@ -423,6 +465,7 @@ namespace constructor{
 				}
 				
 			}
+			// акт 2
 			else if (bar.script_act == 2){
 				
 				_inventory.trigger_notification("Добавлено: Удостоверение личности");
@@ -439,7 +482,7 @@ namespace constructor{
 					hint.setString(hint_text);
 					hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
 					
-					if (Keyboard::isKeyPressed(Keyboard::E)){
+					if (Keyboard::isKeyPressed(Keyboard::E) || Joystick::isButtonPressed(0, 1)){
 						current_act = 2;
 					}
 				}
@@ -454,12 +497,51 @@ namespace constructor{
 				}
 			}
 			
+			// акт 3
 			else if (bar.script_act == 3){
+				if (!cutscene && alpha < 255) {
+					alpha += anim_speed * 25 * deltaTime;
+					bar.isActive = false;
+					if (alpha >= 255){
+						alpha = 255;
+						background_init(window_view_image, background);
+						cutscene = true;
+					}
+				}
+				else {
+					alpha -= anim_speed *  25 * deltaTime;
+					if (alpha <= 0){
+						alpha = 0;
+						bar.isActive = true;
+					}
+				}
+				
 				hero.movement = false;
 			}
 			
+			// акт 4
+			else if (bar.script_act == 4){
+				
+				if (cutscene && alpha < 255) {
+					alpha += anim_speed * 25 * deltaTime;
+					bar.isActive = false;
+					if (alpha >= 255){
+						alpha = 255;
+						background_init(background_image, background);
+						cutscene = false;
+					}
+				}
+				else {
+					alpha -= anim_speed *  25 * deltaTime;
+					if (alpha <= 0){
+						alpha = 0;
+						bar.isActive = true;
+					}
+				}
+			}
 			
 			
+			dark_front.setFillColor(Color(0, 0, 0, (char)alpha));
 			
 			
 			
@@ -476,12 +558,13 @@ namespace constructor{
 	        window.clear();
 	        window.setView(view);
 	        window.draw(background);
-	        hero.render();
+	        if(!cutscene) hero.render();
 	        window.draw(hint);
 	        bar.render();
 			identity_card.render();
 			window_view.render();
 			_inventory.render();
+			window.draw(dark_front);
 	        sceneMenu.render();
 	        window.display();
 	        

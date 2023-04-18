@@ -33,8 +33,7 @@ public:
 	
 	fstream script; //поток для чтения.
 	
-	person *current_person, // текущий персонаж, который произносит реплику
-	character[4];// главный герой.
+	person *current_person; // текущий персонаж, который произносит реплику
 	
 	Clock clock_for_printing; // таймер для равномерной печати текста в диалоговом окне
 	
@@ -68,7 +67,7 @@ public:
 	Clock anim_clock; // таймер для анимации
 	
 //	~~~~~ФУНКЦИИ~~~~~
-	void update(bool notInventary); // обновление
+	void update(bool notInventary, person *character, int size); // обновление
 	void parsing(string str); // разбиение текста на подтексты
 	void render(); // отрисовка объектов интерфейса
 	
@@ -161,29 +160,13 @@ public:
 		else cout<<"File opened succsessfully."<<'\n';
 		
 		
-		// ~~~~НАСТРОЙКИ_ПЕРСОНАЖЕЙ~~~~
-		current_person = &character[0];
 		
-		character[0].name = "виктор";
-		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
-		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
-		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
-		character[0].setPosition(current_left_positoin);
-		
-		character[1].name = "дима";
-		character[1].setPosition(current_right_positoin);
-		
-		character[2].name = "элеонора";
-		character[2].setPosition(current_right_positoin);
-		
-		character[3].name = "преподаватель";
-		character[3].setPosition(current_right_positoin);
 	}
 };
 
-void panel::update(bool notInventary){
+void panel::update(bool notInventary, person *character, int size){
 	// проверка на нажатие левой кнопки мыши
-	if (Mouse::isButtonPressed(Mouse::Left) && !notInventary){
+	if ((Mouse::isButtonPressed(Mouse::Left) || Joystick::isButtonPressed(0, 1)) && !notInventary){
 		if (left_click){
 			// если диалоговое окно открыто
 			if(isActive && !DISAPPEARING){
@@ -208,7 +191,7 @@ void panel::update(bool notInventary){
 					// активация и деактивация текущего персонажа
 					(*current_person).isActive = false;
 					// выбор текущего персонажа исходя из имени текущего спикера
-					for(int i = 0; i < (sizeof(character)/sizeof(person)); i++){
+					for(int i = 0; i < size; i++){
 						if(character[i].name == String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString()){
 							current_person = &character[i];
 							(*current_person).isActive = true;
@@ -225,21 +208,20 @@ void panel::update(bool notInventary){
 			}
 		}
 		left_click = false;
-	} else left_click = true;
+	}
+	else left_click = true;
 	
 	if (printing) {
 		if (!thinking) speaking = true;
 	}	
 	
-	if (Mouse::isButtonPressed(Mouse::Right)){
-		(*current_person).isActive = !(*current_person).isActive;
-	}
-	
 	// отключение подсказки в виде иконки мыши
 	if(alpha > 2) help = false;
 	else help = true;
 	
-	if ((double)anim_clock.getElapsedTime().asMicroseconds() / 1000000 > 1) {
+	
+	
+	if (((double)anim_clock.getElapsedTime().asMicroseconds() / 1000000) > 1) {
 		mouse_icon.setTextureRect(mouse_sprites[1]);
 		arrows.setTextureRect(arrows_sprites[0]);
 	}
@@ -254,13 +236,11 @@ void panel::update(bool notInventary){
 	if (APPEARING) anim_appearing();
 	
 	// действия персонажей
-	
 	if (thinking) (*current_person).isThinking = true;
 	else (*current_person).isThinking = false;
 	
 	if (speaking) (*current_person).isSpeaking = true;
 	else (*current_person).isSpeaking = false;
-	
 	(*current_person).update();
 	
 	// изменения фона затемнения
@@ -297,15 +277,19 @@ void panel::update(bool notInventary){
 	
 	dark_background.setFillColor(Color(0, 0, 0, (char)dark_alpha));
 	
+	
 	current_speech.setPosition(speech_position);
 	person_name.setPosition((*current_person).shape.getPosition().x, name_position.y);
 	
 	current_speech.setString(String::fromUtf8(current_text.begin(), current_text.end()));
 	person_name.setString(String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString());
 	
-	for (int i = 0; i < 3; i++) character[i].printing = printing;
+	for (int i = 0; i < size; i++) {
+		character[i].printing = printing;
+	}
 	
 	if ((double)anim_clock.getElapsedTime().asMicroseconds() / 1000000 >= 2) anim_clock.restart();
+	
 }
 
 // функция отрисовки объектов.
@@ -325,12 +309,12 @@ void panel::parsing(string str){
 	bool name = false;
 	for (int i = 0; i < str.length(); i++){
 		
-		if (str[i] == '{'){
+		if (str[i] == '['){
 			act_number = "";
 			act_calculating = true;
 			continue;
 		}
-		else if (str[i] == '}'){
+		else if (str[i] == ']'){
 			act_calculating = false;
 			act = stoi(act_number);
 			continue;

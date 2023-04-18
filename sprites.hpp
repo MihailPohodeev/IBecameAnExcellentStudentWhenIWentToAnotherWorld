@@ -179,17 +179,24 @@ namespace level2_nmspc{
 	};
 	
 	void main_player::update(){
+		
+		double axisX = Joystick::getAxisPosition(0, Joystick::X) / 100;
+		double axisY = Joystick::getAxisPosition(0, Joystick::Y) / 100;
+		
+		if (abs(axisX) < 0.05f) axisX = 0;
+		if (abs(axisY) < 0.6f) axisY = 0;
+		
 		if (standing && movement){
-			if (Keyboard::isKeyPressed(Keyboard::W)){
+			if (Keyboard::isKeyPressed(Keyboard::W) || axisY < 0){
 				dir = UP;
 			}
-			else if (Keyboard::isKeyPressed(Keyboard::S)){
+			else if (Keyboard::isKeyPressed(Keyboard::S) || axisY > 0){
 				dir = DOWN;
 			}
-			else if (Keyboard::isKeyPressed(Keyboard::A)){
+			else if (Keyboard::isKeyPressed(Keyboard::A) || axisX < 0){
 				dir = LEFT;
 			}
-			else if (Keyboard::isKeyPressed(Keyboard::D)){
+			else if (Keyboard::isKeyPressed(Keyboard::D) || axisX > 0){
 				dir = RIGHT;
 			}
 			else{

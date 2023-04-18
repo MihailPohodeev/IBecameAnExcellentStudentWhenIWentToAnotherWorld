@@ -61,7 +61,7 @@ public:
 		
 		shape.setTexture(&think_txt);
 		
-		isSitting = isDizziness = false;
+		isSitting = isDizziness = isActive = false;
 		
 		moving_coefficient = 5;
 		

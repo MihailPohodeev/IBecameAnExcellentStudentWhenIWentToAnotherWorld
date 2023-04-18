@@ -89,7 +89,7 @@ void inventory::update(){
 	
 	
 	// активация инвентаря по нажатию кнопки "E"
-	if(Keyboard::isKeyPressed(Keyboard::Q)){
+	if(Keyboard::isKeyPressed(Keyboard::Q) || Joystick::isButtonPressed(0, 0)){
 		if(!onPress){
 			isActive = !isActive;
 			clock.restart();

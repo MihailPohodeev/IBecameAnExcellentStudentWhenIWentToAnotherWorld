@@ -98,7 +98,7 @@ namespace level2_nmspc{
 				}
 			}
 			
-			if(Mouse::isButtonPressed(Mouse::Left)){
+			if(Mouse::isButtonPressed(Mouse::Left) || Joystick::isButtonPressed(0, 1)){
 				if (!isClick){
 					if (!isPrinting){
 						name_character = current_speech = current_speech_animated = "";
