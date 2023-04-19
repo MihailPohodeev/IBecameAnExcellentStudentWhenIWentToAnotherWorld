@@ -23,10 +23,10 @@ int main()
 //	window.display();
 ////	window.draw()
 //	
-	setlocale(LC_ALL, "Russian");    
-    main_font.loadFromFile("Fonts/Chava-Regular.ttf");
 //    // текстура заднего фона
 //
+	setlocale(LC_ALL, "Russian");
+	main_font.loadFromFile("Fonts/Chava-Regular.ttf");
 //
 //	Sleep(2000);
 //	
@@ -46,6 +46,7 @@ int main()
 //	    if (to_settings) constructor::settings();
 	  	if (level1_start) constructor::level1();
 		if (level2_start) constructor::level2();
+		if (level2_5_start) constructor::level2_5();
 //		constructor::level2();
 	}
 	

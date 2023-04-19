@@ -217,11 +217,12 @@ namespace constructor{
 	void level1(){
 		
 		panel main_bar; // панель диалогов
-		inventory invent; // инвентарь
 		Clock fps_clock; // часы дл€ просчЄта количества кадров в секунду
 		Text fps_text; // текст отображени€ fps
 		double fps = 0;
 		int old_act = main_bar.act;
+		
+		main_bar.script.open("Scripts/Script.txt");
 	
 		person character[4];
 		
@@ -288,8 +289,7 @@ namespace constructor{
 			// получение позиции мыши
 			mouse_position = Mouse::getPosition(window);
 			
-			main_bar.update(invent.isActive, character, 4);
-			invent.update();
+			main_bar.update(false, character, 4);
 			background_movement(background);
 			
 			if (old_act != main_bar.act){
@@ -298,8 +298,6 @@ namespace constructor{
 				// исчезновение панели диалогов
 				main_bar.DISAPPEARING = true;
 			}
-			
-			cout<<main_bar.act<<'\n';
 			
 			if ((main_bar.dark_alpha >= 254) && (main_bar.act > 0) && (!main_bar.isActive)){
 				if (main_bar.act == 1) background_init(back_texture, background);
@@ -317,7 +315,6 @@ namespace constructor{
 	        window.setView(view);
 	        window.draw(background);
 			main_bar.render();
-			invent.render();
 			window.draw(fps_text);
 	        window.display();
 	        
@@ -351,6 +348,11 @@ namespace constructor{
 		}
 	}
 	
+	
+	
+	
+	
+	// ”–ќ¬≈Ќ№ 2
 	void level2(){
 		
 		// текущий акт
@@ -383,8 +385,11 @@ namespace constructor{
 		// объект персонажа и диалоговой панели
 		level2_nmspc::main_player hero; // персонаж
 		level2_nmspc::dialog_bar bar; // диалоговое окно
+		level2_nmspc::npc emris; // нпс
 		inventory _inventory; // инвентарь
 		scene_menu sceneMenu; // меню
+		
+		emris.setPosition(Vector2f(WIDTH / 2, HEIGHT * 3 / 4));
 		
 		hero.movement = false;
 		bool cutscene = false;
@@ -540,6 +545,19 @@ namespace constructor{
 				}
 			}
 			
+			// акт 5
+			else if (bar.script_act == 5){
+				
+				if (alpha < 255){
+					alpha += anim_speed *  25 * deltaTime;
+					if (alpha >= 255){
+						level2_start = false;
+						level2_5_start = true;
+					}
+				}
+				
+			}
+			
 			
 			dark_front.setFillColor(Color(0, 0, 0, (char)alpha));
 			
@@ -558,7 +576,10 @@ namespace constructor{
 	        window.clear();
 	        window.setView(view);
 	        window.draw(background);
-	        if(!cutscene) hero.render();
+	        if(!cutscene) {
+				hero.render();
+				emris.render();
+			}
 	        window.draw(hint);
 	        bar.render();
 			identity_card.render();
@@ -569,6 +590,57 @@ namespace constructor{
 	        window.display();
 	        
 
+	        
+	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
+		}
+	}
+	
+	// ”–ќ¬≈Ќ№ 2.5
+	void level2_5(){
+		
+		panel main_bar;
+		
+		main_bar.script.open("Scripts/Script3.txt");
+		
+		person character[2];
+		
+		character[0].name = "виктор";
+		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
+		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
+		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
+		character[0].setPosition(main_bar.current_left_positoin);
+		
+		character[1].name = "'эмрис";
+		character[1].setPosition(main_bar.current_right_positoin);
+		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
+		character[1].say[0] = IntRect(42, 11, 120, 245);
+		character[1].say[1] = IntRect(182, 11, 120, 245);
+		character[1].idle_rect[0] = IntRect(332, 11, 120, 245);
+		character[1].idle_rect[1] = IntRect(42, 11, 120, 245);
+		
+		view.setCenter(Vector2f(WIDTH / 2, HEIGHT / 2));
+//		main_bar.isActive = false;
+//		main_bar.APPEARING = true;
+		
+		main_bar.current_person = &character[0];
+		
+		while (window.isOpen() && level2_5_start)
+	    {
+	        clock.restart();
+	        
+			Event event;
+	        while (window.pollEvent(event))
+	        {
+	            if (event.type == sf::Event::Closed)
+	                window.close();
+	        }
+	        
+	        main_bar.update(false, character, 2);
+	        
+	        window.clear();
+	        window.setView(view);
+	        main_bar.render();
+	        window.display();
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
 		}

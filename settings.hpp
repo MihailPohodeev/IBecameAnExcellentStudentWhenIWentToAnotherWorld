@@ -26,7 +26,8 @@ int current_act = 0; // номер акта
 bool debugging = false;
 
 bool level1_start = true; // начата ли игра
-bool level2_start = false; // начата ли игра
+bool level2_start = false; // начата ли игра 2
+bool level2_5_start = false; // переход к уровню 2_5
 bool to_settings = false; // переход к настройкам
 
 Vector2i mouse_position; // позиция мыши
@@ -37,6 +38,8 @@ Color main_color = Color(255, 255, 255, 255); // главный цвет игры.
 RenderWindow window(VideoMode(WIDTH, HEIGHT), "I became an excelent student when I visited another world");
 
 View view(FloatRect(0.f, 0.f, WIDTH, HEIGHT));
+
+
 
 
 

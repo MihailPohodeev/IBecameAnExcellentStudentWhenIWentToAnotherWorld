@@ -137,7 +137,7 @@ public:
 		person_name.setFillColor(text_color);
 		
 		// вычисление количества символов на одну строку
-		symbols_count = WIDTH * 1.5f / text_speech_size;
+		symbols_count = WIDTH * 0.82f / text_speech_size;
 		// задержка между выводом двух соседних символов в секундах
 		printing_delay = 0.05f;
 		// скорость анимации
@@ -148,16 +148,11 @@ public:
 		current_text = name_text = act_number = "";
 		
 		// установка начальных значений булевым переменным
-		APPEARING = DISAPPEARING = false;
+		APPEARING = DISAPPEARING = printing = false;
 		isActive = false;
 		thinking = speaking = act_calculating = false;
 		interrogation = false;
 		help = true;
-		
-		// открытие сценария из текстового документа
-		script.open("Scripts/Script.txt");
-		if(!script) cout<<"Error!!! File not open."<<'\n';
-		else cout<<"File opened succsessfully."<<'\n';
 		
 		
 		
@@ -187,12 +182,11 @@ void panel::update(bool notInventary, person *character, int size){
 					printing_delay = 0.05f; // задержка между выводом двух отдельных символов
 					printing = true; // запуск печати
 					
-					
 					// активация и деактивация текущего персонажа
 					(*current_person).isActive = false;
 					// выбор текущего персонажа исходя из имени текущего спикера
 					for(int i = 0; i < size; i++){
-						if(character[i].name == String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString()){
+						if(character[i].name == name_text){
 							current_person = &character[i];
 							(*current_person).isActive = true;
 						}
@@ -281,8 +275,12 @@ void panel::update(bool notInventary, person *character, int size){
 	current_speech.setPosition(speech_position);
 	person_name.setPosition((*current_person).shape.getPosition().x, name_position.y);
 	
-	current_speech.setString(String::fromUtf8(current_text.begin(), current_text.end()));
-	person_name.setString(String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString());
+//	current_speech.setString(String::fromUtf8(current_text.begin(), current_text.end()));
+//	person_name.setString(String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString());
+
+	cout<<current_text.length()<<'\n';
+	current_speech.setString(current_text);
+	person_name.setString(name_text);
 	
 	for (int i = 0; i < size; i++) {
 		character[i].printing = printing;
@@ -385,6 +383,7 @@ void panel::anim_text(){
 		
 		current_text += script_text[i];
 		
+		cout<<line_breaks_count<<' '<<symbols_count<<'\n';
 		// перевод на новую строку
 		if ((line_breaks_count > symbols_count) && (script_text[i] == ' ')) {
 			current_text += '\n';
@@ -397,7 +396,7 @@ void panel::anim_text(){
 		i += 1;
 		line_breaks_count += 1;
 		// центрирование текста
-		if (!isBreaking) current_speech.setOrigin(Vector2f(text_speech_size * current_text.length() / 5.5f, text_speech_size));
+		if (!isBreaking) current_speech.setOrigin(Vector2f(text_speech_size * current_text.length() / 3.f, text_speech_size));
 	}
 	
 	// если количество символов в строке закончилось

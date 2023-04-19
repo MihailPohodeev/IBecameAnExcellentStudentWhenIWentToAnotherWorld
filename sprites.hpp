@@ -30,6 +30,9 @@ namespace level2_nmspc{
 		
 		FloatRect collision_rect;
 		
+		Vector2f getPosition();
+		void setPosition(Vector2f pos);
+		
 		void _update(); // обновление
 		void render(); // отрисовка
 		
@@ -96,9 +99,73 @@ namespace level2_nmspc{
 		if (debugging) window.draw(collider);
 	}
 	
+	// получить позицию персонажа
+	Vector2f character::getPosition(){
+		return Vector2f(x, y);
+	}
+	
+	// установить позицию персонажа
+	void character::setPosition(Vector2f pos){
+		 shape.setPosition(pos);
+	}
 	
 	
 	
+	class npc : public character{
+	public:
+		
+		Texture texture;
+		
+		bool near_by_player;
+		
+		void update(character &player);
+		void go_to_player(character &player);
+		
+		npc(){
+			near_by_player = false;
+			
+			shape.setSize(Vector2f(WIDTH / 8, HEIGHT / 3));
+			shape.setOrigin(Vector2f(shape.getSize().x / 2, shape.getSize().y));
+			
+		}
+		
+	};
+	
+	void npc::update(character &player){
+		
+		// установка значения близости персонажа к игроку
+		if (sqrt(pow(x - player.getPosition().x, 2) + pow(y - player.getPosition().y, 2)) <= shape.getSize().x * 1.5f) 
+			near_by_player = true;
+		else
+			near_by_player = false;
+			
+		_update();
+	}
+	
+	void npc::go_to_player(character &player){
+		static bool half = false;
+		static double full_x = x;
+		
+		if (!half){
+			if ( x <= full_x / 2){
+				half = true;
+			}
+			else {
+				if (player.getPosition().x > x) x += speed * deltaTime;
+				else x -= speed * deltaTime;
+			}
+		}
+		else {
+			if (player.getPosition().x > x) x += speed * deltaTime;
+			else x -= speed * deltaTime;
+			
+			if (player.getPosition().y > y) y += speed * deltaTime;
+			else y -= speed * deltaTime;
+		}
+	}
+	
+	
+	// главный игрок
 	class main_player : public character{
 		
 		
