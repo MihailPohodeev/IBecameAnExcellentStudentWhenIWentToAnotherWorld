@@ -234,14 +234,14 @@ namespace constructor{
 		
 		character[1].name = "дима";
 		character[1].setPosition(main_bar.current_right_positoin);
-		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
+//		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
 		character[1].say[0] = IntRect(42, 11, 120, 245);
 		character[1].say[1] = IntRect(182, 11, 120, 245);
 		character[1].idle_rect[0] = IntRect(332, 11, 120, 245);
 		character[1].idle_rect[1] = IntRect(42, 11, 120, 245);
 		
 		character[2].name = "элеонора";
-		character[2].setPosition(main_bar.current_right_positoin);
+//		character[2].setPosition(main_bar.current_right_positoin);
 		character[2].say_txt.loadFromFile("Sprites/eleonora_atlas.png");
 		character[2].say[0] = IntRect(26, 0, 162, 245);
 		character[2].say[1] = IntRect(190, 0, 162, 245);
@@ -410,6 +410,8 @@ namespace constructor{
 		
 		background_init(background_image, background);
 		
+		object card;// объект удостоверения личности
+		
 		
 		while (window.isOpen() && level2_start)
 	    {
@@ -473,7 +475,7 @@ namespace constructor{
 			// акт 2
 			else if (bar.script_act == 2){
 				
-				_inventory.trigger_notification("Добавлено: Удостоверение личности");
+				_inventory.trigger_notification("Добавлено: Удостоверение личности", card, 1);
 				
 				if ((event_time < 5.f)){
 					hint_text = "чтобы открыть инвентарь, нажмите клавишу Q.";
@@ -578,7 +580,7 @@ namespace constructor{
 	        window.draw(background);
 	        if(!cutscene) {
 				hero.render();
-				emris.render();
+//				emris.render();
 			}
 	        window.draw(hint);
 	        bar.render();

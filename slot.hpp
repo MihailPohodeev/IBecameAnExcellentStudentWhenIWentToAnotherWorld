@@ -1,4 +1,4 @@
-#include "trigger.hpp"
+#include "object.hpp"
 
 // класс €чейки инвентар€
 class slot{

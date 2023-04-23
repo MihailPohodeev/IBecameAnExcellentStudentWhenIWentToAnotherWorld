@@ -21,13 +21,22 @@ class inventory{
 	enum category {RECORDS, ITEMS}; // перечислимый тип контроля текущей категории инветаря
 	category current_category;
 	
+	object items[8]; // массив вещей
+	object records[8]; // массив записей
+	
+	int items_count; // заполненность массива с вещами
+	int records_count; // заполненность массива с записями
+	
 public:
+	
+	void add_item_object(object &obj); // добавление объекта в инвентарь
+	void add_record_object(object &obj); // добавление записи в инвентарь
 	
 	bool isActive, // активен ли сейчас интерфейс
 	onPress, // для единоразового нажатие кнопки вызова интерфейса
 	onClick; // для единоразового нажатия ЛКМ
 	
-	void trigger_notification(string str); // вызвать уведомление
+	void trigger_notification(string str, object &obj, bool isItem); // вызвать уведомление
 	void update(); // обновление
 	void render(); // отрисовка элементов инвентаря
 	
@@ -54,6 +63,7 @@ public:
 		
 		alpha = 0;
 		max_darkness = 200;
+		items_count = records_count = 0;
 		
 		isActive = false;
 		onPress = onClick = false;
@@ -144,12 +154,14 @@ void inventory::update(){
 }
 
 // анимация уведомления
-void inventory::trigger_notification(string str){
+void inventory::trigger_notification(string str, object &obj, bool isItem){
 	static string old_str = "";
 	static Clock timer;
 	double time_count = (double)timer.getElapsedTime().asMilliseconds() / 1000;
 	
 	if(str != old_str){
+		if (isItem) add_item_object(obj);
+		else add_record_object(obj);
 		old_str = str;
 		timer.restart();
 		string new_str = "";
@@ -186,6 +198,18 @@ void inventory::trigger_notification(string str){
 	}		
 }
 
+void inventory::add_item_object(object &obj){
+	obj.shape.setPosition(slots[records_count].getPosition());
+	items[items_count] = obj;
+	items_count++;
+}
+
+void inventory::add_record_object(object &obj){
+	obj.shape.setPosition(slots[records_count].getPosition());
+	records[records_count] = obj;
+	records_count++;
+}
+
 // отрисовка элементов меню
 void inventory::render(){
 	window.draw(notification_shape);
@@ -193,6 +217,10 @@ void inventory::render(){
 	window.draw(background);
 	for (int i = 0; i < 8; i++){
 		slots[i].render();
+		if (alpha > max_darkness * 0.8f){
+			if(i < records_count && current_category == RECORDS) window.draw(records[i].shape);
+			if(i < items_count && current_category == ITEMS) window.draw(items[i].shape);
+		}
 	}
 	window.draw(inventary_title);
 	(*change_category).update();

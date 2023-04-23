@@ -25,8 +25,8 @@ int current_act = 0; // номер акта
 
 bool debugging = false;
 
-bool level1_start = true; // начата ли игра
-bool level2_start = false; // начата ли игра 2
+bool level1_start = false; // начата ли игра
+bool level2_start = true; // начата ли игра 2
 bool level2_5_start = false; // переход к уровню 2_5
 bool to_settings = false; // переход к настройкам
 
