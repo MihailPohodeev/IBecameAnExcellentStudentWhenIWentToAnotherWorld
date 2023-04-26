@@ -640,7 +640,7 @@ namespace constructor{
 		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
 		character[0].setPosition(main_bar.current_left_positoin);
 		
-		character[1].name = "'эмрис";
+		character[1].name = "эмрис";
 		character[1].setPosition(main_bar.current_right_positoin);
 		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
 		character[1].say[0] = IntRect(42, 11, 120, 245);
@@ -655,6 +655,105 @@ namespace constructor{
 		main_bar.current_person = &character[0];
 		
 		while (window.isOpen() && level2_5_start)
+	    {
+	        clock.restart();
+	        
+			Event event;
+	        while (window.pollEvent(event))
+	        {
+	            if (event.type == sf::Event::Closed)
+	                window.close();
+	        }
+	        
+	        main_bar.update(false, character, 2);
+	        
+	        window.clear();
+	        window.setView(view);
+	        main_bar.render();
+	        window.display();
+	        
+	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
+		}
+	}
+	
+	void level3(){
+		
+		panel main_bar;
+		
+		main_bar.script.open("Scripts/Script4.txt");
+		
+		person character[3];
+		
+		character[0].name = "виктор";
+		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
+		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
+		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
+		character[0].setPosition(main_bar.current_left_positoin);
+		
+		character[1].name = "эмрис";
+		character[1].setPosition(main_bar.current_right_positoin);
+		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
+		character[1].say[0] = IntRect(42, 11, 120, 245);
+		character[1].say[1] = IntRect(182, 11, 120, 245);
+		character[1].idle_rect[0] = IntRect(332, 11, 120, 245);
+		character[1].idle_rect[1] = IntRect(42, 11, 120, 245);
+		
+		character[2].name = "зендей";
+		character[2].setPosition(main_bar.current_right_positoin);
+		
+		main_bar.current_person = &character[0];
+		
+		while (window.isOpen() && level3_start)
+	    {
+	        clock.restart();
+	        
+			Event event;
+	        while (window.pollEvent(event))
+	        {
+	            if (event.type == sf::Event::Closed)
+	                window.close();
+	        }
+	        
+	        main_bar.update(false, character, 2);
+	        
+	        window.clear();
+	        window.setView(view);
+	        main_bar.render();
+	        window.display();
+	        
+	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
+		}
+		
+	}
+	
+	// допрос подозреваемого
+	void level4(){
+		panel main_bar;
+		
+		main_bar.script.open("Scripts/Script5.txt");
+		
+		person character[3];
+		
+		character[0].name = "виктор";
+		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
+		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
+		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
+		character[0].setPosition(main_bar.current_left_positoin);
+		
+		character[1].name = "эмрис";
+		character[1].setPosition(main_bar.current_right_positoin);
+		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
+		character[1].say[0] = IntRect(42, 11, 120, 245);
+		character[1].say[1] = IntRect(182, 11, 120, 245);
+		character[1].idle_rect[0] = IntRect(332, 11, 120, 245);
+		character[1].idle_rect[1] = IntRect(42, 11, 120, 245);
+		
+		character[2].name = "зендей";
+		character[2].setPosition(main_bar.current_right_positoin);
+		
+		main_bar.current_person = &character[0];
+		
+		while (window.isOpen() && level3_start)
 	    {
 	        clock.restart();
 	        
