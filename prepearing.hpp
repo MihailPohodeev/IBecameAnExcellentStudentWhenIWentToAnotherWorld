@@ -218,13 +218,20 @@ namespace constructor{
 		
 		panel main_bar; // панель диалогов
 		Clock fps_clock; // часы для просчёта количества кадров в секунду
+		Clock final_darkness; // таймер для затемнения
 		Text fps_text; // текст отображения fps
 		double fps = 0;
+		double alpha = 0; // степень прозрачности фона затемнения
 		int old_act = main_bar.act;
 		
 		main_bar.script.open("Scripts/Script.txt");
 	
 		person character[4];
+			
+		RectangleShape dark; // затемнение экрана
+		dark.setSize(Vector2f(WIDTH, HEIGHT));
+		dark.setPosition(0, 0);
+		dark.setFillColor(Color(0, 0, 0, 0));
 		
 		character[0].name = "виктор";
 		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
@@ -241,8 +248,8 @@ namespace constructor{
 		character[1].idle_rect[1] = IntRect(42, 11, 120, 245);
 		
 		character[2].name = "элеонора";
-//		character[2].setPosition(main_bar.current_right_positoin);
-		character[2].say_txt.loadFromFile("Sprites/eleonora_atlas.png");
+		character[2].setPosition(main_bar.current_right_positoin);
+//		character[2].say_txt.loadFromFile("Sprites/eleonora_atlas.png");
 		character[2].say[0] = IntRect(26, 0, 162, 245);
 		character[2].say[1] = IntRect(190, 0, 162, 245);
 		character[2].idle_rect[0] = IntRect(360, 0, 162, 245);
@@ -292,12 +299,6 @@ namespace constructor{
 			main_bar.update(false, character, 4);
 			background_movement(background);
 			
-			if (old_act != main_bar.act){
-				// затемнение заднего фона
-				main_bar.isDark = true;
-				// исчезновение панели диалогов
-				main_bar.DISAPPEARING = true;
-			}
 			
 			if ((main_bar.dark_alpha >= 254) && (main_bar.act > 0) && (!main_bar.isActive)){
 				if (main_bar.act == 1) background_init(back_texture, background);
@@ -305,16 +306,43 @@ namespace constructor{
 					background_init(classroom_texture, background);
 					for (int i = 0; i < 3; i++) character[i].isSitting = true;
 				}
-				else if (main_bar.act == 3){
-					level1_start = false;
-					level2_start = true;
-				}
 				main_bar.isDark = false;
 			}
+			
+			if (main_bar.act == 3){				
+				if (alpha < 253.f){
+					alpha += anim_speed * 5 * deltaTime;
+					dark.setFillColor(Color(0, 0, 0, char(alpha)));
+					final_darkness.restart();
+					if(alpha > 254) alpha = 255;
+				}
+				else{
+					if((int)(((double)final_darkness.getElapsedTime().asMilliseconds() / 1000) / 0.25f) % 2 == 0){
+						dark.setFillColor(Color(0, 0, 0, 255));
+					}
+					else{
+						dark.setFillColor(Color(255, 255, 255, 255));
+					}
+					if ((double)final_darkness.getElapsedTime().asMilliseconds() / 1000 > 1){
+						level1_start = false;
+						level2_start = true;
+					}
+				}
+			}
+			else {
+				if (old_act != main_bar.act){
+					// затемнение заднего фона
+					main_bar.isDark = true;
+					// исчезновение панели диалогов
+					main_bar.DISAPPEARING = true;
+				}
+			}
+			
 	        window.clear();
 	        window.setView(view);
 	        window.draw(background);
 			main_bar.render();
+			window.draw(dark);
 			window.draw(fps_text);
 	        window.display();
 	        

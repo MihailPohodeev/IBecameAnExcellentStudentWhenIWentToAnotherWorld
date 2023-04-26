@@ -37,6 +37,9 @@ public:
 	
 	Clock clock_for_printing; // таймер для равномерной печати текста в диалоговом окне
 	
+	SoundBuffer buffer; // звук набора текста
+	Sound text_appearence;
+	
 	RectangleShape panel_shape; // форма панели
 	RectangleShape dark_background; // форма для затемнения экрана
 	RectangleShape mouse_icon; // иконка мыши для обозначения клика ЛКМ
@@ -155,7 +158,8 @@ public:
 		help = true;
 		
 		
-		
+		buffer.loadFromFile("Sounds/text.ogg");
+		text_appearence.setBuffer(buffer);
 	}
 };
 
@@ -277,8 +281,7 @@ void panel::update(bool notInventary, person *character, int size){
 	
 //	current_speech.setString(String::fromUtf8(current_text.begin(), current_text.end()));
 //	person_name.setString(String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString());
-
-	cout<<current_text.length()<<'\n';
+	
 	current_speech.setString(current_text);
 	person_name.setString(name_text);
 	
@@ -382,8 +385,8 @@ void panel::anim_text(){
 	if (time_for_printing >= printing_delay) {
 		
 		current_text += script_text[i];
+		if (printing_delay > 0.03f)	text_appearence.play();
 		
-		cout<<line_breaks_count<<' '<<symbols_count<<'\n';
 		// перевод на новую строку
 		if ((line_breaks_count > symbols_count) && (script_text[i] == ' ')) {
 			current_text += '\n';
