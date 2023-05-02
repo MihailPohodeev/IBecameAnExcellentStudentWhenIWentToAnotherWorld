@@ -27,10 +27,11 @@ int current_act = 0; // номер акта
 bool debugging = false;
 
 bool level1_start = true; // начата ли игра
-bool level2_start = false; // начата ли игра 2
-bool level2_5_start = false; // переход к уровню 2_5
-bool level3_start = false; // переход к уровню 3
+bool level2_start = true; // начата ли игра 2
+bool level2_5_start = true; // переход к уровню 2_5
+bool level3_start = true; // переход к уровню 3
 bool level4_start = true; // переход к уровню 4
+bool level5_start = true; // переход к уровню 5
 bool to_settings = false; // переход к настройкам
 
 Vector2i mouse_position; // позиция мыши

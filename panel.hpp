@@ -72,7 +72,7 @@ public:
 //	~~~~~ФУНКЦИИ~~~~~
 	void update(bool notInventary, person *character, int size); // обновление
 	void parsing(string str); // разбиение текста на подтексты
-	void render(); // отрисовка объектов интерфейса
+	virtual void render(); // отрисовка объектов интерфейса
 	
 	void anim_appearing(); // анимация появления панели диалогов
 	void anim_disappearing(); // анимация исчезновения панели диалогов
@@ -160,6 +160,7 @@ public:
 		
 		buffer.loadFromFile("Sounds/text.ogg");
 		text_appearence.setBuffer(buffer);
+		text_appearence.setVolume(5.f);
 	}
 };
 

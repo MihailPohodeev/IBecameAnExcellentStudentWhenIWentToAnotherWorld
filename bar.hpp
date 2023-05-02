@@ -13,6 +13,8 @@ namespace level2_nmspc{
 		RectangleShape shape; // форма панели
 		RectangleShape name_shape; // форма окна с именем персонажа
 		
+		int max_lenght; // максимальное количество букв в строке
+		
 		double alpha; // степень прозрачности панели
 		double x, y; // координаты панели
 		double speed; // скорость анимации
@@ -24,6 +26,9 @@ namespace level2_nmspc{
 		string current_speech; // текущая речь персонажа
 		string name_character; // имя персонажа
 		string current_speech_animated; // анимированный текст текущей речи
+		
+		SoundBuffer buffer; // звук набора текста
+		Sound text_appearence;
 		
 		void parsing(string str); // парсер сценария
 		void text_animation(string str); // анимация набора сценария
@@ -53,20 +58,22 @@ namespace level2_nmspc{
 			name_shape.setOutlineColor(Color(0, 0, 0, 255));
 			name_shape.setPosition(WIDTH / 9, HEIGHT + thick_size + name_shape.getSize().y / 2);
 			
+			name_character = "виктор";
 			name.setFont(main_font);
 			name.setFillColor(Color(0, 0, 0, 255));
 			name.setCharacterSize((HEIGHT + WIDTH) / 2 * 0.016f);
-			name.setPosition(name_shape.getPosition().x, name_shape.getPosition().y);
-			name.setString("виктор");
+			name.setPosition(name_shape.getPosition().x - name.getCharacterSize() * 0.8f * name_character.length() / 2, name_shape.getPosition().y - name.getCharacterSize() / 2);
+			name.setString(name_character);
 			
 			speech.setFont(main_font);
 			speech.setFillColor(Color(0, 0, 0, 255));
 			speech.setCharacterSize((HEIGHT + WIDTH) / 2 * 0.025f);
-			speech.setPosition(WIDTH / 8, HEIGHT + shape.getSize().y / 2);
+			speech.setPosition(WIDTH / 8, HEIGHT + shape.getSize().y / 3);
 			
 			x = WIDTH / 2;
 			y = HEIGHT - (WIDTH - shape.getSize().x) / 2;
 			
+			max_lenght = WIDTH / 13.66f;
 			script_act = 0;
 			
 			speed = WIDTH / 4.f;
@@ -75,6 +82,10 @@ namespace level2_nmspc{
 			isClick = false;
 			isActive = false;
 			isPrinting = false;
+			
+			buffer.loadFromFile("Sounds/text.ogg");
+			text_appearence.setBuffer(buffer);
+			text_appearence.setVolume(5.f);
 			
 			script.open("Scripts/Script2.txt");
 			if(!script) cout<<"Error!!! File not open."<<'\n';
@@ -106,6 +117,7 @@ namespace level2_nmspc{
 						getline(script, script_text);
 						parsing(script_text);
 						name.setString(name_character);
+						name.setPosition(name_shape.getPosition().x - name.getCharacterSize() * 0.8f * name_character.length() / 2, name_shape.getPosition().y - name.getCharacterSize() / 2);
 						isPrinting = true;
 					}
 					else{
@@ -180,19 +192,27 @@ namespace level2_nmspc{
 	// анимация набора текста
 	void dialog_bar::text_animation(string str){
 		static int index = 0;
+		static int line_index = 0;
 		static Clock text_animation_timer;
 		double text_animation_time = (double)text_animation_timer.getElapsedTime().asMilliseconds() / 1000;
 		
 		if(current_speech_animated.length() >= str.length()){
-			index = 0;
+			index = line_index = 0;
 			isPrinting = false;
 		}
 		
 		if (text_animation_time > delta_time_text_animation){
+			if (delta_time_text_animation > 0.04f) text_appearence.play();
 			current_speech_animated += str[index];
 			index++;
+			line_index++;
 			text_animation_timer.restart();
-		}		
+		}
+		
+		if (line_index > max_lenght && str[index] == ' '){
+			current_speech_animated += '\n';
+			line_index = 0;
+		}
 	}
 	
 	// отрисовка

@@ -1,4 +1,4 @@
-#include "panel.hpp"
+#include "interrogation.hpp"
 
 namespace constructor{
 	
@@ -7,6 +7,9 @@ namespace constructor{
     
     // метод меню
     void menu(){
+    	
+    	Music music; // музыка
+    	music.openFromFile("Music/Friendly_Melody.ogg");
     	
     	Text title; // заголовок в меню
     	
@@ -49,6 +52,11 @@ namespace constructor{
 		bool anim = true,
 		isClick = false,
 		startIsClick = false;
+		
+		music.setLoop(true);
+		music.play();
+		
+		float volume = 100.f; // громкость музыки
     	
     	while (window.isOpen())
     	{
@@ -93,7 +101,9 @@ namespace constructor{
 			}
 			
 			if (level1_start && !exit.isActive && exit.alpha == 0){
-				break;
+				music.setVolume(volume);
+				volume -= anim_speed * 5 * deltaTime;
+				if (volume <= 0) break;
 			}
 	        
 	        // отрисовка объектов
@@ -233,6 +243,10 @@ namespace constructor{
 		dark.setPosition(0, 0);
 		dark.setFillColor(Color(0, 0, 0, 0));
 		
+		Music music;
+		music.openFromFile("Music/A_Likely_Story.ogg");
+		float volume = 10.f;
+		
 		character[0].name = "виктор";
 		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
 		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
@@ -240,20 +254,23 @@ namespace constructor{
 		character[0].setPosition(main_bar.current_left_positoin);
 		
 		character[1].name = "дима";
+		character[1].shape.setSize(Vector2f(WIDTH * 0.25f, HEIGHT * 0.65f));
 		character[1].setPosition(main_bar.current_right_positoin);
-//		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
-		character[1].say[0] = IntRect(42, 11, 120, 245);
-		character[1].say[1] = IntRect(182, 11, 120, 245);
-		character[1].idle_rect[0] = IntRect(332, 11, 120, 245);
-		character[1].idle_rect[1] = IntRect(42, 11, 120, 245);
+		character[1].say_txt.loadFromFile("Sprites/Dimass_say.png");
+		character[1].say[0] = IntRect(13, 0, 160, 256);
+		character[1].say[1] = IntRect(333, 0, 160, 256);
+		character[1].idle_rect[0] = IntRect(13, 0, 160, 256);
+		character[1].idle_rect[1] = IntRect(493, 0, 160, 256);
 		
 		character[2].name = "элеонора";
+		character[2].shape.setSize(Vector2f(WIDTH * 0.28f, HEIGHT * 0.6f));
 		character[2].setPosition(main_bar.current_right_positoin);
-//		character[2].say_txt.loadFromFile("Sprites/eleonora_atlas.png");
-		character[2].say[0] = IntRect(26, 0, 162, 245);
-		character[2].say[1] = IntRect(190, 0, 162, 245);
-		character[2].idle_rect[0] = IntRect(360, 0, 162, 245);
-		character[2].idle_rect[1] = IntRect(530, 0, 162, 245);
+		character[2].setOrigin(Vector2f(character[2].shape.getSize().x / 2, character[2].shape.getSize().y));
+		character[2].say_txt.loadFromFile("Sprites/Eleonora_say.png");
+		character[2].say[0] = IntRect(0, 0, 220, 256);
+		character[2].say[1] = IntRect(220, 0, 220, 256);
+		character[2].idle_rect[0] = IntRect(0, 0, 220, 256);
+		character[2].idle_rect[1] = IntRect(685, 0, 220, 256);
 		
 		character[3].name = "преподаватель";
 		character[3].setPosition(main_bar.current_right_positoin);
@@ -281,6 +298,10 @@ namespace constructor{
 	    // масштабирование заднего фона
 	    background_init(black, background);
 //	    window.setFramerateLimit(60);
+	    
+	    music.setLoop(true);
+	    music.play();
+	    music.setVolume(10.f);
 	    
 		while (window.isOpen() && level1_start)
 	    {
@@ -311,6 +332,7 @@ namespace constructor{
 			
 			if (main_bar.act == 3){				
 				if (alpha < 253.f){
+					volume -= anim_speed * 2 * deltaTime;
 					alpha += anim_speed * 5 * deltaTime;
 					dark.setFillColor(Color(0, 0, 0, char(alpha)));
 					final_darkness.restart();
@@ -323,7 +345,7 @@ namespace constructor{
 					else{
 						dark.setFillColor(Color(255, 255, 255, 255));
 					}
-					if ((double)final_darkness.getElapsedTime().asMilliseconds() / 1000 > 1){
+					if ((double)final_darkness.getElapsedTime().asMilliseconds() / 1000 > 1 && volume <= 0){
 						level1_start = false;
 						level2_start = true;
 					}
@@ -337,6 +359,8 @@ namespace constructor{
 					main_bar.DISAPPEARING = true;
 				}
 			}
+			
+			music.setVolume(volume);
 			
 	        window.clear();
 	        window.setView(view);
@@ -382,6 +406,12 @@ namespace constructor{
 	
 	// УРОВЕНЬ 2
 	void level2(){
+		
+		Music music;
+		music.openFromFile("Music/I-Am-Okay-With-What-I-Am-Doing.ogg");
+		music.setVolume(10.f);
+		music.setLoop(true);
+		music.play();
 		
 		// текущий акт
 		current_act = 0;
@@ -439,6 +469,7 @@ namespace constructor{
 		background_init(background_image, background);
 		
 		object card;// объект удостоверения личности
+		card.description = "Удостоверение личности, кого-то похожего на вампира. В графе \"Имя\" написано \"Вит Калиновский\"";
 		
 		
 		while (window.isOpen() && level2_start)
@@ -599,6 +630,9 @@ namespace constructor{
 		        _inventory.update();
 		        if(bar.isActive) _inventory.isActive = false;
 	    	}
+	    	else {
+	    		_inventory.isActive = false;
+			}
 	    	
 	    	sceneMenu.update();
 	        
@@ -627,6 +661,8 @@ namespace constructor{
 	
 	// УРОВЕНЬ 2.5
 	void level2_5(){
+		
+		scene_menu sceneMenu;
 		
 		panel main_bar;
 		
@@ -665,11 +701,27 @@ namespace constructor{
 	                window.close();
 	        }
 	        
-	        main_bar.update(false, character, 2);
+	        mouse_position = Vector2i(Mouse::getPosition(window).x + view.getCenter().x - WIDTH / 2, Mouse::getPosition(window).y + view.getCenter().y - HEIGHT / 2);
+	        
+	        sceneMenu.update();
+	        
+	        if (!sceneMenu.isActive){
+	        	main_bar.update(false, character, 2);
+	    	}
+	        
+	        if (main_bar.act == 1){
+	        	main_bar.isActive = false;
+	        	main_bar.DISAPPEARING = true;
+	        	if (main_bar.alpha < 5){
+	        		level2_5_start = false;
+	        		level3_start = true;
+				}
+			}
 	        
 	        window.clear();
 	        window.setView(view);
 	        main_bar.render();
+	        sceneMenu.render();
 	        window.display();
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
@@ -692,11 +744,11 @@ namespace constructor{
 		
 		character[1].name = "эмрис";
 		character[1].setPosition(main_bar.current_right_positoin);
-		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
-		character[1].say[0] = IntRect(42, 11, 120, 245);
-		character[1].say[1] = IntRect(182, 11, 120, 245);
-		character[1].idle_rect[0] = IntRect(332, 11, 120, 245);
-		character[1].idle_rect[1] = IntRect(42, 11, 120, 245);
+		character[1].say_txt.loadFromFile("Sprites/Emris_say.png");
+		character[1].say[0] = IntRect(230, 0, 115, 256);
+		character[1].say[1] = IntRect(345, 0, 115, 256);
+		character[1].idle_rect[0] = IntRect(0, 0, 115, 256);
+		character[1].idle_rect[1] = IntRect(345, 0, 115, 256);
 		
 		character[2].name = "зендей";
 		character[2].setPosition(main_bar.current_right_positoin);
@@ -726,7 +778,7 @@ namespace constructor{
 		
 	}
 	
-	// допрос подозреваемого
+	// подготовка к допросу подозреваемого
 	void level4(){
 		panel main_bar;
 		
@@ -742,18 +794,18 @@ namespace constructor{
 		
 		character[1].name = "эмрис";
 		character[1].setPosition(main_bar.current_right_positoin);
-		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
-		character[1].say[0] = IntRect(42, 11, 120, 245);
-		character[1].say[1] = IntRect(182, 11, 120, 245);
-		character[1].idle_rect[0] = IntRect(332, 11, 120, 245);
-		character[1].idle_rect[1] = IntRect(42, 11, 120, 245);
+		character[1].say_txt.loadFromFile("Sprites/Emris_say.png");
+		character[1].say[0] = IntRect(345, 0, 115, 256);
+		character[1].say[1] = IntRect(460, 0, 115, 256);
+		character[1].idle_rect[0] = IntRect(0, 0, 115, 256);
+		character[1].idle_rect[1] = IntRect(115, 0, 115, 256);
 		
 		character[2].name = "зендей";
 		character[2].setPosition(main_bar.current_right_positoin);
 		
 		main_bar.current_person = &character[0];
 		
-		while (window.isOpen() && level3_start)
+		while (window.isOpen() && level4_start)
 	    {
 	        clock.restart();
 	        
@@ -770,6 +822,33 @@ namespace constructor{
 	        window.setView(view);
 	        main_bar.render();
 	        window.display();
+	        
+	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
+		}
+	}
+	
+	// уровень 5
+	// допрос подозреваемого
+	void level5(){
+		
+		interrogation main_bar;
+		
+		while (window.isOpen() && level5_start)
+	    {
+	        clock.restart();
+	        
+			Event event;
+	        while (window.pollEvent(event))
+	        {
+	            if (event.type == sf::Event::Closed)
+	                window.close();
+	        }
+		
+			window.clear();
+	        window.setView(view);
+	        main_bar.render();
+	        window.display();
+	        
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
 		}

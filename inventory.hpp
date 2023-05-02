@@ -4,6 +4,7 @@ class inventory{
 	
 	RectangleShape background;
 	RectangleShape notification_shape;
+	RectangleShape description_shape; // форма для описания предметов
 	
 	double anim_time, // время для анимации
 	alpha, // альфа-канал заднего фона
@@ -13,7 +14,7 @@ class inventory{
 	
 	Clock clock; // таймер
 	
-	Text inventary_title; // надпись "инвентарь"
+	Text description; // надпись "инвентарь"
 	Text notif_text; // текст уведомления
 	
 	Button *change_category; // кнопка смены категории инвентаря "записи / предметы";
@@ -26,6 +27,11 @@ class inventory{
 	
 	int items_count; // заполненность массива с вещами
 	int records_count; // заполненность массива с записями
+	int max_line_len; // максимальное количество символов в строке
+	
+	string cut_text(string str); // функция разбиения текста на строки
+	
+	bool isClickSlot[8]; // для единоразового нажатия на кнопку слота
 	
 public:
 	
@@ -46,10 +52,10 @@ public:
 		slots[1].setPosition(WIDTH * 2 / 5, HEIGHT * 0.45f);
 		slots[2].setPosition(WIDTH * 3 / 5, HEIGHT * 0.45f);
 		slots[3].setPosition(WIDTH * 4 / 5, HEIGHT * 0.45f);
-		slots[4].setPosition(WIDTH * 1 / 5, HEIGHT * 0.75f);
-		slots[5].setPosition(WIDTH * 2 / 5, HEIGHT * 0.75f);
-		slots[6].setPosition(WIDTH * 3 / 5, HEIGHT * 0.75f);
-		slots[7].setPosition(WIDTH * 4 / 5, HEIGHT * 0.75f);
+		slots[4].setPosition(WIDTH * 1 / 5, HEIGHT * 0.7f);
+		slots[5].setPosition(WIDTH * 2 / 5, HEIGHT * 0.7f);
+		slots[6].setPosition(WIDTH * 3 / 5, HEIGHT * 0.7f);
+		slots[7].setPosition(WIDTH * 4 / 5, HEIGHT * 0.7f);
 		
 		background.setSize(Vector2f(WIDTH, HEIGHT));
 		background.setFillColor(Color(0, 0, 0, 0));
@@ -61,28 +67,34 @@ public:
 		notification_shape.setOutlineColor(Color(0,0,0,200));
 		notification_shape.setPosition(WIDTH + notification_shape.getSize().x + thick_size * 1.0001f, notification_shape.getSize().y * 1.5f);
 		
+		description_shape.setSize(Vector2f(WIDTH * .72f, HEIGHT * 0.20f));
+		description_shape.setOrigin(Vector2f(description_shape.getSize().x / 2, description_shape.getSize().y / 2));
+		description_shape.setPosition(WIDTH / 2, description_shape.getSize().y * 0.8f);
+		description_shape.setOutlineThickness(thick_size);
+		description_shape.setFillColor(Color(255, 255, 255, 0));
+		description_shape.setOutlineColor(Color(0, 0, 0, 0));
+		
+		
 		alpha = 0;
 		max_darkness = 200;
 		items_count = records_count = 0;
+		max_line_len = WIDTH / 16;
 		
 		isActive = false;
 		onPress = onClick = false;
 		
 		current_category = ITEMS;
 		change_category = new Button(WIDTH * 0.25f, HEIGHT * 0.1f);
-		(*change_category).setPosition(WIDTH * 3 / 4, HEIGHT / 6);
+		(*change_category).setPosition(WIDTH / 2, HEIGHT - (*change_category).getSize().y);
 		(*change_category).setText("записи");
 		(*change_category).setTextSize((WIDTH + HEIGHT) / 2 * 0.03f);
 		(*change_category).isActive = false;
 		
-		inventary_title.setFont(main_font);
-		inventary_title.setFillColor(Color(255, 255, 255, 0));
-		inventary_title.setCharacterSize((HEIGHT + WIDTH) / 25);
-		inventary_title.setString("ИНВЕНТАРЬ");
-		inventary_title.setOutlineColor(Color(0, 0, 0, 255));
-		inventary_title.setOutlineThickness(thick_size);
-		inventary_title.setOrigin(Vector2f(((string)inventary_title.getString().toAnsiString()).length() * inventary_title.getCharacterSize() / 3.f, inventary_title.getCharacterSize() / 2));
-		inventary_title.setPosition(Vector2f(WIDTH / 4, HEIGHT / 6));
+		description.setFont(main_font);
+		description.setFillColor(Color(0, 0, 0, 0));
+		description.setCharacterSize((HEIGHT + WIDTH) / 80);
+		description.setString("пусто");
+		description.setPosition(Vector2f(description_shape.getPosition().x * 0.3f, description_shape.getPosition().y * 0.6f));
 		
 		notif_text.setFont(main_font);
 		notif_text.setFillColor(Color(0, 0, 0, 255));
@@ -96,7 +108,6 @@ public:
 void inventory::update(){
 	
 	anim_time = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
-	
 	
 	// активация инвентаря по нажатию кнопки "E"
 	if(Keyboard::isKeyPressed(Keyboard::Q) || Joystick::isButtonPressed(0, 0)){
@@ -145,12 +156,38 @@ void inventory::update(){
 	
 	for (char i = 0; i < 8; i++){
 		slots[i].update();
+		if (slots[i].onClick()){
+			if (!isClickSlot[i]){
+				description.setString(cut_text((current_category == RECORDS) ? records[i].description : items[i].description));
+				cout<<"Da"<<'\n';
+			}
+			isClickSlot[i] = true;
+		}
+		else isClickSlot[i] = false;
 	}
 	
 	background.setFillColor(Color(0, 0, 0, (char)alpha));
 	
-	inventary_title.setFillColor(Color(255, 255, 255, (char)255 * alpha / max_darkness));
-	inventary_title.setOutlineColor(Color(0, 0, 0, (char)255 * alpha / max_darkness));
+	description_shape.setFillColor(Color(255, 255, 255, (char)255 * alpha / max_darkness));
+	description_shape.setOutlineColor(Color(0, 0, 0, (char)255 * alpha / max_darkness));
+	
+	description.setFillColor(Color(0, 0, 0, (char)255 * alpha / max_darkness));
+}
+
+string inventory::cut_text(string str){
+	static int line_len = 0;
+	string result = "";
+	for(int i = 0; i < str.length(); i++){
+		result += str[i];
+		if (line_len > max_line_len && str[i] == ' '){
+			cout<<line_len<<'\n';
+			result += '\n';
+			line_len = 0;
+		}
+		line_len++;
+	}
+	line_len = 0;
+	return result;
 }
 
 // анимация уведомления
@@ -212,9 +249,10 @@ void inventory::add_record_object(object &obj){
 
 // отрисовка элементов меню
 void inventory::render(){
-	window.draw(notification_shape);
-	window.draw(notif_text);
+//	window.draw(notification_shape);
+//	window.draw(notif_text);
 	window.draw(background);
+	window.draw(description_shape);
 	for (int i = 0; i < 8; i++){
 		slots[i].render();
 		if (alpha > max_darkness * 0.8f){
@@ -222,7 +260,7 @@ void inventory::render(){
 			if(i < items_count && current_category == ITEMS) window.draw(items[i].shape);
 		}
 	}
-	window.draw(inventary_title);
+	window.draw(description);
 	(*change_category).update();
 }
 

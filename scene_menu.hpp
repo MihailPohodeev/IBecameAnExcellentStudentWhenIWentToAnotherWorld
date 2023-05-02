@@ -72,6 +72,9 @@ void scene_menu::update(){
 		if ((*main_menu).onClick()){
 			level1_start = false;
 			level2_start = false;
+			level2_5_start = false;
+			level3_start = false;
+			level4_start = false;
 		}
 	}
 	else{

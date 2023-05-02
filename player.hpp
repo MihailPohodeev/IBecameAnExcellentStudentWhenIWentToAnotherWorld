@@ -51,6 +51,7 @@ public:
 	
 	// установить стандартную позицию
 	void setPosition(Vector2f pos);
+	void setOrigin(Vector2f pos);
 	
 	void anim_disappearing();
 	void anim_appearing();
@@ -204,6 +205,14 @@ void person::change_atlas(){
 		shape.setTexture(&sitting);
 		shape.setSize(Vector2f(WIDTH / 3, HEIGHT / 3));
 	}
+}
+
+// смена центра
+void person::setOrigin(Vector2f pos){
+	shape.setOrigin(pos);
+	
+	shape_origin[0] = shape.getOrigin();
+	shape_origin[1] = Vector2f(shape.getOrigin().x + moving_coefficient, shape.getOrigin().y);
 }
 
 // анимация исчезновения персоажа

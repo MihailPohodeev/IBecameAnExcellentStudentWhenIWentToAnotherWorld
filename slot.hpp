@@ -16,6 +16,7 @@ public:
 	bool isActive; // активна ли €чейка
 	
 	void update(); // обновление
+	bool onClick(); // действие по нажатию на слот
 	void render(); // отрисовка
 	void setPosition(Vector2f pos); // установить позицию €чейки
 	void setPosition(double x, double y); // установить позицию €чейки
@@ -70,6 +71,12 @@ void slot::update(){
 	
 	shape.setFillColor(slot_color);
 	shape.setOutlineColor(Color(0, 0, 0, char(alpha)));
+}
+
+// дейтсвие по нажатию на слот
+bool slot::onClick(){
+	if (shape_rect.contains((Vector2f)mouse_position) && Mouse::isButtonPressed(Mouse::Left)) return true;
+	return false;
 }
 
 // установить координаты
