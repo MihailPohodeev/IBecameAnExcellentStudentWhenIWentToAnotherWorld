@@ -10,7 +10,7 @@ public:
 	speaking, // говорит ли сейчас персонаж
 	APPEARING, // появление диалоговой панели
 	DISAPPEARING, // исчезновение диалоговой панели
-	interrogation, // режим допроса
+	isInterrogation, // режим допроса
 	act_calculating, // вычисление номера акта
 	help, // подсказка игроку
 	next, // закончена ли анимация набора текста
@@ -60,7 +60,7 @@ public:
 	
 	Color bar_color, // цвет и прозрачность диалоговой панели
 	text_color, // цвет текста
-	interrogation_text_color; // цвет текста при допросе
+	isInterrogation_text_color; // цвет текста при допросе
 	
 	Texture icons; // текстура иконок
 	
@@ -70,8 +70,8 @@ public:
 	Clock anim_clock; // таймер для анимации
 	
 //	~~~~~ФУНКЦИИ~~~~~
-	void update(bool notInventary, person *character, int size); // обновление
-	void parsing(string str); // разбиение текста на подтексты
+	virtual void update(bool notInventary, person *character, int size); // обновление
+	virtual void parsing(string str); // разбиение текста на подтексты
 	virtual void render(); // отрисовка объектов интерфейса
 	
 	void anim_appearing(); // анимация появления панели диалогов
@@ -127,7 +127,7 @@ public:
 		
 		
 		// установка цвета
-		interrogation_text_color = Color(0, 255, 0, 255);
+		isInterrogation_text_color = Color(0, 180, 0, 255);
 		bar_color = Color(255, 255, 255, 255);
 		text_color = Color(0, 0, 0, 255);
 		
@@ -154,7 +154,7 @@ public:
 		APPEARING = DISAPPEARING = printing = false;
 		isActive = false;
 		thinking = speaking = act_calculating = false;
-		interrogation = false;
+		isInterrogation = false;
 		help = true;
 		
 		
@@ -263,7 +263,7 @@ void panel::update(bool notInventary, person *character, int size){
 	
 	panel_shape.setFillColor(Color(255, 255, 255, (char)alpha));
 	
-	if (interrogation) {
+	if (isInterrogation) {
 		current_speech.setFillColor(Color(0, 100, 0, (char)alpha));
 		person_name.setFillColor(Color(0,100,0, (char)alpha));
 		panel_shape.setOutlineColor(Color(0,100,0, (char)alpha));

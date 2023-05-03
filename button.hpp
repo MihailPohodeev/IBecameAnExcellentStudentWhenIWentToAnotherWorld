@@ -2,23 +2,24 @@
 
 class Button{
 	
-	// форма кнопки
-	RectangleShape shape;
-	
 	// текст кнопки
 	Text button_text;
 	
 	// коллайер кнопки
 	FloatRect shape_rect;
 	
-	// цвет кнопки
-	Color shape_color,
-	outline_color;
-	
 	// размер текста
 	double text_size;
 	
 public:
+	
+	// форма кнопки
+	RectangleShape shape;
+	
+	// цвет кнопки
+	Color shape_color,
+	outline_color,
+	text_color;
 		
 	bool isActive, // активна ли кнопка
 	oldActive, // переменна€ дл€ вы€влени€ изменени€ активности кнопки
@@ -46,14 +47,15 @@ public:
 	// конструктор
 	Button(int width, int height){
 		
-		shape_color = Color(255, 255, 255, 255);
-		outline_color = Color(0, 0, 0, 255);
+		shape_color = Color(255, 255, 255, 0);
+		outline_color = Color(0, 0, 0, 0);
+		text_color = Color(0, 0, 0, 0);
 		
 		shape.setSize(Vector2f(width, height));
 		shape.setOrigin(Vector2f(width / 2, height / 2));
 		shape.setOutlineThickness(thick_size);
 		button_text.setFont(main_font);
-		button_text.setFillColor(Color(0, 0, 0, 255));
+		button_text.setFillColor(Color(0, 0, 0, 0));
 				
 		
 		alpha = 0;
@@ -76,11 +78,11 @@ void Button::update(){
 		if (anim_playing) anim_appearing();
 		else {
 			if(shape_rect.contains((Vector2f)mouse_position)){
-				shape_color = Color(128, 128, 128, 255);
-				if (Mouse::isButtonPressed(Mouse::Left)) shape_color = Color(64, 64, 64, 255);
+				shape.setFillColor(Color(shape_color.r / 2, shape_color.g / 2, shape_color.b / 2, (char)alpha));
+				if (Mouse::isButtonPressed(Mouse::Left)) shape.setFillColor(Color(shape_color.r / 4, shape_color.g / 4, shape_color.b / 4, (char)alpha));
 			}
 			else {
-				shape_color = Color(255, 255, 255, 255);
+				shape.setFillColor(Color(shape_color.r, shape_color.g, shape_color.b, (char)alpha));
 			}
 		}
 	}
@@ -90,9 +92,8 @@ void Button::update(){
 	
 	oldActive = isActive;
 	
-	shape.setFillColor(Color(shape_color.r, shape_color.g, shape_color.b, (char)alpha));
 	shape.setOutlineColor(Color(outline_color.r, outline_color.g, outline_color.b, (char)alpha));
-	button_text.setFillColor(Color(0, 0, 0, (char)alpha));
+	button_text.setFillColor(Color(text_color.r, text_color.g, text_color.b, (char)alpha));
 	
 	window.draw(shape);
 	window.draw(button_text);
@@ -122,14 +123,14 @@ void Button::setSize(int width, int height){
 // установить текст
 void Button::setText(string str){
 	button_text.setString(str);
-	button_text.setOrigin(Vector2f(((string)button_text.getString().toAnsiString()).length() * text_size / 3.f, text_size / 2));
+	button_text.setOrigin(Vector2f(((string)button_text.getString().toAnsiString()).length() * text_size / 2.6f, text_size / 2));
 }
 
 // установить размер шрифта
 void Button::setTextSize(double size){
 	text_size = size;
 	button_text.setCharacterSize(size);
-	button_text.setOrigin(Vector2f(((string)button_text.getString().toAnsiString()).length() * text_size / 3.f, text_size / 2));
+	button_text.setOrigin(Vector2f(((string)button_text.getString().toAnsiString()).length() * text_size / 2.6f, text_size / 2));
 }
 
 // получить размер кнопки
@@ -153,6 +154,8 @@ void Button::anim_disappearing(){
 		anim_playing = false;
 	}
 	if (alpha < 0) alpha = 0;
+	
+	shape.setFillColor(Color(shape_color.r, shape_color.g, shape_color.b, (char)alpha));
 }
 
 // анимаци€ по€влени€
@@ -173,6 +176,8 @@ void Button::anim_appearing(){
 		anim_playing = false;
 	}
 	if (alpha > 255) alpha = 255;
+	
+	shape.setFillColor(Color(shape_color.r, shape_color.g, shape_color.b, (char)alpha));
 }
 
 // постепенное исчезновение кнопок.

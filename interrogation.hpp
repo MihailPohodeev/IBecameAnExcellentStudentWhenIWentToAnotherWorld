@@ -1,28 +1,205 @@
 #include "panel.hpp"
 
-class interrogation {
+class interrogation : public panel{
 	
 public:
 	
-	panel main_bar;
 	
-	void update(); // обновление
+	void update(bool notInventary, person *character, int size); // обновление
 	void render(); // отрисовка интерфейса
 	
 	Button *objection; // кнопка возражения
+	Button *more_details; // кнопка "подробнее"
 	
-	interrogation(){
+	bool more; // больше информации
+	
+	interrogation() : panel() {
 		
-		objection = new Button(WIDTH / 10, HEIGHT / 10);
-		(*objection).setPosition(WIDTH / 2, HEIGHT * 0.9f);
+		isActive = false;
+		
+		more = false;
+		symbols_count = WIDTH * 0.65f / text_speech_size;
+		
+		panel_shape.setFillColor(Color(0,0,0,0));
+		
+		objection = new Button(WIDTH / 7, HEIGHT / 13);
+		more_details = new Button(WIDTH / 7, HEIGHT / 13);
+		speech_position = Vector2f(panel_shape.getSize().x * 0.4f, panel_shape.getPosition().y * 1.1f);
+		
+		(*objection).setPosition(panel_shape.getSize().x + (WIDTH - panel_shape.getSize().x) / 2 - (*objection).getSize().x * 0.7f, panel_shape.getPosition().y + panel_shape.getSize().y / 4);
+		(*objection).setText("возразить");
+		(*objection).setTextSize((WIDTH + HEIGHT) / 2 * 0.025f);
+		(*objection).isActive = false;
+		(*objection).shape_color = Color(200, 200, 200, 0);
+		(*objection).outline_color = Color(0, 180, 0, 0);
+		(*objection).text_color = Color(0, 180, 0, 0);
+		
+		(*more_details).setPosition(panel_shape.getSize().x + (WIDTH - panel_shape.getSize().x) / 2 - (*objection).getSize().x * 0.7f, panel_shape.getPosition().y + panel_shape.getSize().y * 0.75f);
+		(*more_details).setText("подробнее");
+		(*more_details).setTextSize((WIDTH + HEIGHT) / 2 * 0.025f);
+		(*more_details).isActive = false;
+		(*more_details).shape_color = Color(200, 200, 200, 0);
+		(*more_details).outline_color = Color(0, 180, 0, 0);
+		(*more_details).text_color = Color(0, 180, 0, 0);
 	}	
 };
 
-void update(){
-//	main_bar.update();
+// обновление
+void interrogation::update(bool notInventary, person *character, int size){
+	
+	if ((Mouse::isButtonPressed(Mouse::Left) || Joystick::isButtonPressed(0, 1)) && !notInventary){
+		if (left_click){
+			if(isActive && !DISAPPEARING){
+				if (!printing){
+				
+					if ((*more_details).onClick() && current_text.length() != 0){
+						(*more_details).isActive = false;
+						more = true;
+					}
+					
+					getline(script, script_text);
+					cout<<script_text<<'\n';
+					bool isAct = false;
+					string act_str = current_text = name_text = "";
+					thinking = false;
+					bool name = false;
+					string speech = "";
+					if (!more){
+						
+						(*more_details).isActive = true;
+						while(script_text[0] != '[')
+							getline(script, script_text);
+							
+						for (int i = 0; i < script_text.length(); i++){
+							if (script_text[i] == '['){
+								isAct = true;
+								continue;
+							}
+							else if (script_text[i] == ']'){
+								isAct = false;
+								act = stoi(act_str);
+								continue;
+							}
+							else if (script_text[i] == '<') {
+								name = true;
+								continue;
+							} 
+							else if (script_text[i] == '>') {
+								name = false;
+								continue;
+							}
+							
+							if (script_text[i] == '@') thinking = true;
+							
+							if (isAct) act_str += script_text[i];
+							else if (name) name_text += script_text[i];
+							else if ((name == false) && (script_text[i] != '@') && (script_text[i] != '%')) speech += script_text[i];
+						}
+						script_text = speech;
+						printing = true;
+					}
+					else{
+						for (int i = 0; i < script_text.length(); i++){
+							if (script_text[i] == '{'){
+								continue;
+							}
+							else if (script_text[i] == '}'){
+								more = false;
+								continue;
+							}
+							else if (script_text[i] == '<') {
+								name = true;
+								continue;
+							} 
+							else if (script_text[i] == '>') {
+								name = false;
+								continue;
+							}
+							
+							if (name) name_text += script_text[i];
+							if (script_text[i] == '@') thinking = true;
+							if ((name == false) && (script_text[i] != '@') && (script_text[i] != '%')) speech += script_text[i];
+						}
+						script_text = speech;
+						printing = true;
+					}
+					
+					if (script_text.length() == 0) {
+						(*current_person).isActive = false;
+						isActive = false;
+						DISAPPEARING = true;
+						return;
+					}
+					
+					(*current_person).isActive = false;
+					// выбор текущего персонажа исходя из имени текущего спикера
+					for(int i = 0; i < size; i++){
+						if(character[i].name == name_text){
+							current_person = &character[i];
+							(*current_person).isActive = true;
+							cout<<i<<'\n';
+						}
+					}
+					
+				}
+			}
+			else if (!DISAPPEARING){
+				APPEARING = true;
+				(*objection).isActive = true;
+				(*more_details).isActive = true;
+			}
+			
+			left_click = false;
+		}
+	}
+	else{
+		left_click = true;
+	}
+	
+	if (DISAPPEARING) {
+		anim_disappearing();
+		(*objection).isActive = false;
+		(*more_details).isActive = false;
+	}
+	if (APPEARING) anim_appearing();
+	
+	if (printing) {
+		anim_text();
+		if (!thinking) 
+			speaking = true;
+	}
+	else speaking = false;
+	
+	// действия персонажей
+	if (thinking) (*current_person).isThinking = true;
+	else (*current_person).isThinking = false;
+	
+	if (speaking) (*current_person).isSpeaking = true;
+	else (*current_person).isSpeaking = false;
+	(*current_person).update();
+	
+	current_speech.setFillColor(Color(0, 100, 0, (char)alpha));
+	person_name.setFillColor(Color(0,100,0, (char)alpha));
+	panel_shape.setFillColor(Color(255, 255, 255, (char)alpha));
+	panel_shape.setOutlineColor(Color(0,180,0, (char)alpha));
+	
+	current_speech.setString(current_text);
+	person_name.setString(name_text);
+	
+	panel_shape.setPosition(bar_position);
+	current_speech.setPosition(speech_position);
+	person_name.setPosition((*current_person).shape.getPosition().x, name_position.y);	
 }
 
+// отрисовка
 void interrogation::render(){
-	main_bar.render();
+	
+	window.draw(dark_background);
+	window.draw((*current_person).shape);
+	window.draw(panel_shape);
+	window.draw(current_speech);
+	window.draw(person_name);
+	if (help) window.draw(mouse_icon);
 	(*objection).update();
+	(*more_details).update();
 }

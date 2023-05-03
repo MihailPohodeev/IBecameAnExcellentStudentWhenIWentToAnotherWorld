@@ -831,7 +831,21 @@ namespace constructor{
 	// допрос подозреваемого
 	void level5(){
 		
-		interrogation main_bar;
+		interrogation *main_bar = new interrogation();
+		(*main_bar).script.open("Scripts/Script5.txt");
+		
+		person character[2];
+		
+		character[0].name = "виктор";
+		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
+		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
+		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
+		character[0].setPosition((*main_bar).current_left_positoin);
+		
+		character[1].name = "зендей";
+		character[1].setPosition((*main_bar).current_right_positoin);
+		
+		(*main_bar).current_person = &character[1];
 		
 		while (window.isOpen() && level5_start)
 	    {
@@ -843,10 +857,20 @@ namespace constructor{
 	            if (event.type == sf::Event::Closed)
 	                window.close();
 	        }
+	        
+	        mouse_position = Mouse::getPosition(window);
+		
+			(*main_bar).update(false, character, 2);
+			
+			if ((*main_bar).act == 9) {
+				cout<<(*main_bar).act<<'\n';
+				(*main_bar).isActive = false;
+				(*main_bar).DISAPPEARING = true;
+			}
 		
 			window.clear();
 	        window.setView(view);
-	        main_bar.render();
+	        (*main_bar).render();
 	        window.display();
 	        
 	        
