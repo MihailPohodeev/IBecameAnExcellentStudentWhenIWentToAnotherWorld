@@ -678,11 +678,11 @@ namespace constructor{
 		
 		character[1].name = "эмрис";
 		character[1].setPosition(main_bar.current_right_positoin);
-		character[1].say_txt.loadFromFile("Sprites/dmitriy_atlas.png");
-		character[1].say[0] = IntRect(42, 11, 120, 245);
-		character[1].say[1] = IntRect(182, 11, 120, 245);
-		character[1].idle_rect[0] = IntRect(332, 11, 120, 245);
-		character[1].idle_rect[1] = IntRect(42, 11, 120, 245);
+		character[1].say_txt.loadFromFile("Sprites/Emris_say.png");
+		character[1].say[0] = IntRect(230, 0, 115, 256);
+		character[1].say[1] = IntRect(345, 0, 115, 256);
+		character[1].idle_rect[0] = IntRect(0, 0, 115, 256);
+		character[1].idle_rect[1] = IntRect(345, 0, 115, 256);
 		
 		view.setCenter(Vector2f(WIDTH / 2, HEIGHT / 2));
 //		main_bar.isActive = false;
@@ -775,7 +775,6 @@ namespace constructor{
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
 		}
-		
 	}
 	
 	// подготовка к допросу подозреваемого
@@ -816,7 +815,7 @@ namespace constructor{
 	                window.close();
 	        }
 	        
-	        main_bar.update(false, character, 2);
+	        main_bar.update(false, character, 3);
 	        
 	        window.clear();
 	        window.setView(view);
@@ -833,6 +832,7 @@ namespace constructor{
 		
 		interrogation *main_bar = new interrogation();
 		(*main_bar).script.open("Scripts/Script5.txt");
+		inventory _inventory;
 		
 		person character[2];
 		
@@ -847,6 +847,12 @@ namespace constructor{
 		
 		(*main_bar).current_person = &character[1];
 		
+		RectangleShape background; // форма заднего фона
+		Texture texture;
+		texture.loadFromFile("Sprites/prison.jpg");
+		
+		background_init(texture, background);
+		
 		while (window.isOpen() && level5_start)
 	    {
 	        clock.restart();
@@ -860,24 +866,324 @@ namespace constructor{
 	        
 	        mouse_position = Mouse::getPosition(window);
 		
-			(*main_bar).update(false, character, 2);
+			background_movement(background);
+			
+			_inventory.update();
+			(*main_bar).update(_inventory.isActive, character, 2);
 			
 			if ((*main_bar).act == 9) {
 				cout<<(*main_bar).act<<'\n';
 				(*main_bar).isActive = false;
 				(*main_bar).DISAPPEARING = true;
 			}
-		
+			
 			window.clear();
 	        window.setView(view);
+	        window.draw(background);
 	        (*main_bar).render();
+	        _inventory.render();
 	        window.display();
 	        
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
 		}
 	}
+	
+	// Сценарий 2
+	// уровень 5_5 диалог в офисе
+	void level5_5(){
+		
+		panel main_bar;
+		
+		main_bar.script.open("Scripts/Script5_5.txt");
+		
+		person character[2];
+		
+		character[0].name = "виктор";
+		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
+		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
+		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
+		character[0].setPosition(main_bar.current_left_positoin);
+		
+		character[1].name = "эмрис";
+		character[1].setPosition(main_bar.current_right_positoin);
+		character[1].say_txt.loadFromFile("Sprites/Emris_say.png");
+		character[1].say[0] = IntRect(230, 0, 115, 256);
+		character[1].say[1] = IntRect(345, 0, 115, 256);
+		character[1].idle_rect[0] = IntRect(0, 0, 115, 256);
+		character[1].idle_rect[1] = IntRect(345, 0, 115, 256);
+		
+		main_bar.current_person = &character[0];
+		
+		while (window.isOpen() && level5_5_start)
+	    {
+	        clock.restart();
+	        
+			Event event;
+	        while (window.pollEvent(event))
+	        {
+	            if (event.type == sf::Event::Closed)
+	                window.close();
+	        }
+	        
+	        main_bar.update(false, character, 2);
+	        if(main_bar.act == 1){
+	        	level5_5_start = false;
+	        	level6_start = true;
+			}
+	        
+	        window.clear();
+	        window.setView(view);
+	        main_bar.render();
+	        window.display();
+	        
+	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
+		}
+	}
+	
+	// уровень в квартире
+	void level6(){
+		
+		bool isDialogActive = false;
+		
+		
+		level2_nmspc::main_player hero; // персонаж
+		panel bar; // диалоговое окно
+		level2_nmspc::npc emris; // нпс эмрис
+		level2_nmspc::npc anna; // нпс анна
+		inventory _inventory;
+		
+		trigger anna_trig = trigger(anna.getSize().x * 2, anna.getSize().x * 0.25f);
+		trigger note_trig = trigger(WIDTH * 0.1f, HEIGHT* 0.1f);
+		trigger map_trig = trigger(WIDTH * 0.1f, HEIGHT* 0.1f);
+		
+		note_trig.setPosition(WIDTH * 0.3, HEIGHT * 0.7f);
+		map_trig.setPosition(WIDTH * 0.6, HEIGHT * 0.7f);
+		
+		bar.isDarkness = false;
+		bar.allowed = false;
+		bar.script.open("Scripts/Script6.txt");
+		
+		object _map;
+		object note;
+		
+		_map.description = "Карта с несколькими обозначенными местами. Точно известно, что все эти места заброшены.";
+		note.description = "Записка : \"Ушел к своему обычному месту. Не скучай и не волнуйся. Лен.\"";
+		
+		person character[3];
+		
+		character[0].name = "виктор";
+		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
+		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
+		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
+		character[0].setPosition(bar.current_left_positoin);
+		
+		character[1].name = "эмрис";
+		character[1].setPosition(bar.current_right_positoin);
+		character[1].say_txt.loadFromFile("Sprites/Emris_say.png");
+		character[1].say[0] = IntRect(230, 0, 115, 256);
+		character[1].say[1] = IntRect(345, 0, 115, 256);
+		character[1].idle_rect[0] = IntRect(0, 0, 115, 256);
+		character[1].idle_rect[1] = IntRect(345, 0, 115, 256);
+		
+		character[2].name = "анна";
+		character[2].setPosition(bar.current_right_positoin);
+		
+		RectangleShape dark_back; //  форма для затемнения заднего фона во время диалогов
+		RectangleShape dark_front; // форма для затемнения экрана
+		Clock timer_for_darkness; // таймер затемнения
+		
+		int text_size = (HEIGHT + WIDTH) / 2 * 0.025f;
+		Text hint;
+		hint.setFont(main_font);
+		hint.setCharacterSize(text_size);
+		hint.setString("");
+		hint.setFillColor(Color(255, 255, 255, 255));
+		hint.setOutlineThickness(thick_size / 2);
+		hint.setOutlineColor(Color(0, 0, 0, 255));
+		hint.setPosition(WIDTH / 2 - ((string)(hint.getString())).length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+		
+		Text start_text;
+		start_text.setFont(main_font);
+		start_text.setCharacterSize((WIDTH + HEIGHT) / 75);
+		start_text.setString("...тем же вечером");
+		start_text.setFillColor(Color(255, 255, 255, 255));
+		start_text.setPosition(WIDTH * 0.7f, HEIGHT * 0.9f);
+		
+		dark_front.setSize(Vector2f(WIDTH, HEIGHT * 1.5f));
+		dark_front.setPosition(0, 0);
+		dark_front.setFillColor(Color(0, 0, 0, 255));
+		dark_back.setSize(Vector2f(WIDTH, HEIGHT * 1.5f));
+		dark_back.setPosition(0, 0);
+		dark_back.setFillColor(Color(0, 0, 0, 255));
+		float dark_alpha = 255;
+		float dark_back_alpha = 0;
+		
+		bar.current_person = &character[0];
+		
+		hero.setPosition(Vector2f(1, HEIGHT * 0.75f));
+		emris.setPosition(Vector2f(-50, HEIGHT * 0.85f));
+		anna.setPosition(Vector2f(WIDTH - 100, HEIGHT * 0.8f));
+		
+		hero.allowed = false;
+		hero.stand = true;
+		
+		bool get_map = false, get_note = false;
+		
+		while (window.isOpen() && level6_start)
+	    {
+	        clock.restart();
+	        
+			Event event;
+	        while (window.pollEvent(event))
+	        {
+	            if (event.type == sf::Event::Closed)
+	                window.close();
+	        }
+	    	
+	    	mouse_position = Mouse::getPosition(window);
+	    	
+			if (timer_for_darkness.getElapsedTime().asSeconds() >= 4){
+		    	
+		    	if (dark_alpha > 0){
+		    		dark_alpha -= anim_speed * 5 * deltaTime;
+		    		if (dark_alpha <= 0) dark_alpha = 0;
+				}
+				dark_front.setFillColor(Color(0, 0, 0, (char)dark_alpha));
+			
+				if(bar.act == 0){
+		    		if (hero.getPosition().x < WIDTH / 3) {
+						hero.dir = RIGHT;
+						emris.dir = RIGHT;
+					}
+		    		else{
+		    			emris.dir = STOP;
+		    			hero.dir = STOP;
+		    			hero.allowed = true;
+		    			bar.act = 1;
+					}
+				}
+				else if (bar.act == 1){
+					bar.allowed = true;
+					isDialogActive = true;
+				}
+				else if (bar.act == 2){
+					if (anna_trig.intersects(hero.collision_rect)){
+						bar.allowed = true;
+						if (bar.APPEARING || bar.isActive){
+							hero.allowed = false;
+							isDialogActive = true;
+						}
+					}
+					else{
+						bar.DISAPPEARING = true;
+						bar.allowed = false;
+						hero.allowed = true;
+						isDialogActive = false;
+					}
+				}
+				else if (bar.act == 3){
+					
+					if (anna.getPosition().x < WIDTH) anna.dir = RIGHT;
+					else anna.dir = STOP;
+					
+					if (note_trig.intersects(hero.collision_rect) && !get_note && get_map){
+						hint.setString("для взаимодействия нажмите клавишу E");
+						hint.setPosition(WIDTH / 2 - ((string)(hint.getString())).length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+						if (Keyboard::isKeyPressed(Keyboard::E)){
+							get_note = true;
+						}
+					}
+					else if (map_trig.intersects(hero.collision_rect) && !get_map){
+						hint.setString("для взаимодействия нажмите клавишу E");
+						hint.setPosition(WIDTH / 2 - ((string)(hint.getString())).length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+						if (Keyboard::isKeyPressed(Keyboard::E)){
+							get_map = true;
+						}
+					}
+					else{
+						hint.setString("");
+					}
+					
+					if (get_note && get_map) {
+						hint.setString("");
+						bar.act = 4;
+					}
+					
+					bar.DISAPPEARING = true;
+					bar.allowed = false;
+					hero.allowed = true;
+					isDialogActive = false;
+				}
+				else if (bar.act == 4){
+					if (anna.getPosition().x > WIDTH * 0.7f) anna.dir = LEFT;
+					else {
+						anna.dir = STOP;
+						if (anna_trig.intersects(hero.collision_rect)){
+							bar.allowed = true;
+							if (bar.APPEARING || bar.isActive){
+								hero.allowed = false;
+								isDialogActive = true;
+							}
+						}
+					}
+				}
+			}
+			
+			if (get_map){
+				if (get_note) _inventory.trigger_notification("Добавлено: Загадочная записка", note, 0);
+				else _inventory.trigger_notification("Добавлено: Карта местности", _map, 1);
+			}
+			
+			
+			if(!isDialogActive){
+				hero.update();
+				emris.update(hero);
+				anna.update(hero);
+				
+				if (dark_back_alpha > 0 && bar.isActive) {
+					dark_back_alpha -= anim_speed * 10 * deltaTime;
+					if (dark_back_alpha <= 0) dark_back_alpha = 0;
+				}
+			}
+			else{
+				if (dark_back_alpha < 128) {
+					dark_back_alpha += anim_speed * 10 * deltaTime;
+					if (dark_back_alpha >= 128) dark_back_alpha = 128;
+				}
+				
+				_inventory.isActive = false;
+			}
+			
+			dark_back.setFillColor(Color(0, 0, 0, (char)dark_back_alpha));
+			
+			_inventory.update();
+		    bar.update(false, character, 3);
+			
+			anna_trig.setPosition(anna.getPosition().x, anna.getPosition().y);
+			
+	    	window.clear();
+	        window.setView(view);
+	        hero.render();
+	        emris.render();
+	        anna.render();
+	        window.draw(hint);
+	        _inventory.render();
+	        window.draw(dark_back);
+	        bar.render();
+	        window.draw(dark_front);
+	        if (timer_for_darkness.getElapsedTime().asSeconds() < 3) window.draw(start_text);
+	        anna_trig.render();
+	        note_trig.render();
+	        map_trig.render();
+	        window.display();
+	        
+	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
+		}
+		
+	}
 }
+
 
 
 

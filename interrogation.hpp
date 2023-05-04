@@ -12,15 +12,21 @@ public:
 	Button *more_details; // кнопка "подробнее"
 	
 	bool more; // больше информации
+	bool isInterrogation; // режим допроса
+	
+	float green_level; // уровень зеленого цвета
 	
 	interrogation() : panel() {
 		
 		isActive = false;
 		
 		more = false;
+		isInterrogation = false;
+		
 		symbols_count = WIDTH * 0.65f / text_speech_size;
 		
 		panel_shape.setFillColor(Color(0,0,0,0));
+		green_level = 0;
 		
 		objection = new Button(WIDTH / 7, HEIGHT / 13);
 		more_details = new Button(WIDTH / 7, HEIGHT / 13);
@@ -57,8 +63,10 @@ void interrogation::update(bool notInventary, person *character, int size){
 						more = true;
 					}
 					
+//					script.clear();
+//					script.seekg(0);
 					getline(script, script_text);
-					cout<<script_text<<'\n';
+					printing_delay = 0.05f;
 					bool isAct = false;
 					string act_str = current_text = name_text = "";
 					thinking = false;
@@ -137,16 +145,17 @@ void interrogation::update(bool notInventary, person *character, int size){
 						if(character[i].name == name_text){
 							current_person = &character[i];
 							(*current_person).isActive = true;
-							cout<<i<<'\n';
 						}
-					}
-					
+					}	
+				}
+				else {
+					printing_delay = 0.01f;
 				}
 			}
 			else if (!DISAPPEARING){
 				APPEARING = true;
-				(*objection).isActive = true;
-				(*more_details).isActive = true;
+				(*objection).isActive = false;
+				(*more_details).isActive = false;
 			}
 			
 			left_click = false;
@@ -154,6 +163,25 @@ void interrogation::update(bool notInventary, person *character, int size){
 	}
 	else{
 		left_click = true;
+	}
+	
+	if (isInterrogation){
+		(*objection).isActive = true;
+		
+		if (green_level < 128) green_level += anim_speed * 5 * deltaTime;
+		else green_level = 128;
+	}
+	else {
+		(*objection).isActive = false;
+		
+		if (green_level > 0) green_level -= anim_speed * 5 * deltaTime;
+		else green_level = 0;
+		
+		if (act == 5) {
+			isInterrogation = true;
+			script.clear();
+			script.seekg(0);
+		}
 	}
 	
 	if (DISAPPEARING) {
@@ -178,17 +206,22 @@ void interrogation::update(bool notInventary, person *character, int size){
 	else (*current_person).isSpeaking = false;
 	(*current_person).update();
 	
-	current_speech.setFillColor(Color(0, 100, 0, (char)alpha));
-	person_name.setFillColor(Color(0,100,0, (char)alpha));
+	current_speech.setFillColor(Color(0, (char)green_level, 0, (char)alpha));
+	person_name.setFillColor(Color(0, (char)green_level, 0, (char)alpha));
 	panel_shape.setFillColor(Color(255, 255, 255, (char)alpha));
-	panel_shape.setOutlineColor(Color(0,180,0, (char)alpha));
+	panel_shape.setOutlineColor(Color(0, (char)green_level, 0, (char)alpha));
+	dark_background.setFillColor(Color(0, 0, 0, (char)dark_alpha));
+	(*more_details).outline_color = Color(0, (char)green_level, 0, 0);
+	(*more_details).text_color = Color(0, (char)green_level, 0, 0);
+	(*objection).outline_color = Color(0, (char)green_level, 0, 0);
+	(*objection).text_color = Color(0, (char)green_level, 0, 0);
 	
 	current_speech.setString(current_text);
 	person_name.setString(name_text);
 	
 	panel_shape.setPosition(bar_position);
 	current_speech.setPosition(speech_position);
-	person_name.setPosition((*current_person).shape.getPosition().x, name_position.y);	
+	person_name.setPosition(current_left_positoin.x, name_position.y);
 }
 
 // отрисовка

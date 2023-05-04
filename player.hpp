@@ -19,6 +19,7 @@ public:
 	printing, // печатается ли текст
 	isDizziness; // головокружение
 	
+	
 	Vector2f shape_origin[2], // позиции игрока для анимирования
 	position;
 	

@@ -18,19 +18,19 @@ namespace level2_nmspc{
 		
 		int up_barrier, down_barrier, right_barrier, left_barrier;
 		
-		// перечислимый тип направления
-		enum direction {STOP, UP, DOWN, RIGHT, LEFT};
-		direction dir;
-		direction last_dir;
-		
 		
 	public:
+		
+		// направление движения
+		direction dir;
+		direction last_dir;
 		
 		bool movement; // доступно ли движение
 		
 		FloatRect collision_rect;
 		
 		Vector2f getPosition();
+		Vector2f getSize();
 		void setPosition(Vector2f pos);
 		
 		void _update(); // обновление
@@ -99,6 +99,10 @@ namespace level2_nmspc{
 		if (debugging) window.draw(collider);
 	}
 	
+	Vector2f character::getSize(){
+		return shape.getSize();
+	}
+	
 	// получить позицию персонажа
 	Vector2f character::getPosition(){
 		return Vector2f(x, y);
@@ -106,7 +110,8 @@ namespace level2_nmspc{
 	
 	// установить позицию персонажа
 	void character::setPosition(Vector2f pos){
-		 shape.setPosition(pos);
+		 x = pos.x;
+		 y = pos.y;
 	}
 	
 	
@@ -189,7 +194,8 @@ namespace level2_nmspc{
 		Clock anim_timer;
 		
 		bool standing,
-		stand;
+		stand,
+		allowed; // разрешено ли управление с клавиатуры
 		
 		void update();
 		void animation();
@@ -198,6 +204,7 @@ namespace level2_nmspc{
 			
 			name = "виктор";
 			standing = stand = false;
+			allowed = true;
 			
 			texture.loadFromFile("Sprites/player_atlas.png");
 			shape.setTexture(&texture);
@@ -253,7 +260,7 @@ namespace level2_nmspc{
 		if (abs(axisX) < 0.05f) axisX = 0;
 		if (abs(axisY) < 0.6f) axisY = 0;
 		
-		if (standing && movement){
+		if (standing && movement && allowed){
 			if (Keyboard::isKeyPressed(Keyboard::W) || axisY < 0){
 				dir = UP;
 			}

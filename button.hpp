@@ -71,6 +71,7 @@ public:
 void Button::update(){
 	
 	shape_rect = shape.getGlobalBounds();
+	shape.setFillColor(Color(shape_color.r, shape_color.g, shape_color.b, (char)alpha));
 	
 	if (isActive != oldActive) anim_playing = true;
 	
@@ -87,10 +88,11 @@ void Button::update(){
 		}
 	}
 	else if (anim_playing){
-		anim_disappearing();	
+		anim_disappearing();
 	}
 	
 	oldActive = isActive;
+	
 	
 	shape.setOutlineColor(Color(outline_color.r, outline_color.g, outline_color.b, (char)alpha));
 	button_text.setFillColor(Color(text_color.r, text_color.g, text_color.b, (char)alpha));
@@ -154,8 +156,6 @@ void Button::anim_disappearing(){
 		anim_playing = false;
 	}
 	if (alpha < 0) alpha = 0;
-	
-	shape.setFillColor(Color(shape_color.r, shape_color.g, shape_color.b, (char)alpha));
 }
 
 // анимация появления
@@ -176,8 +176,6 @@ void Button::anim_appearing(){
 		anim_playing = false;
 	}
 	if (alpha > 255) alpha = 255;
-	
-	shape.setFillColor(Color(shape_color.r, shape_color.g, shape_color.b, (char)alpha));
 }
 
 // постепенное исчезновение кнопок.

@@ -10,11 +10,12 @@ public:
 	speaking, // говорит ли сейчас персонаж
 	APPEARING, // появление диалоговой панели
 	DISAPPEARING, // исчезновение диалоговой панели
-	isInterrogation, // режим допроса
 	act_calculating, // вычисление номера акта
 	help, // подсказка игроку
 	next, // закончена ли анимация набора текста
-	isDark; // затемнён ли экран
+	isDark, // затемнён ли экран
+	isDarkness,
+	allowed; // разрешено ли открыть панель диалогов
 	
 	string current_text, script_text, // текст сценария в текстовой переменной
 	name_text, // строка имени текущего персонажа
@@ -59,8 +60,8 @@ public:
 	Text person_name; // тектовая переменная, хранящая имя текущего персонажа
 	
 	Color bar_color, // цвет и прозрачность диалоговой панели
-	text_color, // цвет текста
-	isInterrogation_text_color; // цвет текста при допросе
+	text_color; // цвет текста
+	
 	
 	Texture icons; // текстура иконок
 	
@@ -127,7 +128,6 @@ public:
 		
 		
 		// установка цвета
-		isInterrogation_text_color = Color(0, 180, 0, 255);
 		bar_color = Color(255, 255, 255, 255);
 		text_color = Color(0, 0, 0, 255);
 		
@@ -154,8 +154,7 @@ public:
 		APPEARING = DISAPPEARING = printing = false;
 		isActive = false;
 		thinking = speaking = act_calculating = false;
-		isInterrogation = false;
-		help = true;
+		help = isDarkness = allowed = true;;
 		
 		
 		buffer.loadFromFile("Sounds/text.ogg");
@@ -166,7 +165,7 @@ public:
 
 void panel::update(bool notInventary, person *character, int size){
 	// проверка на нажатие левой кнопки мыши
-	if ((Mouse::isButtonPressed(Mouse::Left) || Joystick::isButtonPressed(0, 1)) && !notInventary){
+	if ((Mouse::isButtonPressed(Mouse::Left) || Joystick::isButtonPressed(0, 1)) && !notInventary && allowed){
 		if (left_click){
 			// если диалоговое окно открыто
 			if(isActive && !DISAPPEARING){
@@ -263,16 +262,9 @@ void panel::update(bool notInventary, person *character, int size){
 	
 	panel_shape.setFillColor(Color(255, 255, 255, (char)alpha));
 	
-	if (isInterrogation) {
-		current_speech.setFillColor(Color(0, 100, 0, (char)alpha));
-		person_name.setFillColor(Color(0,100,0, (char)alpha));
-		panel_shape.setOutlineColor(Color(0,100,0, (char)alpha));
-	}
-	else {
-		current_speech.setFillColor(Color(0, 0, 0, (char)alpha));
-		person_name.setFillColor(Color(0,0,0, (char)alpha));
-		panel_shape.setOutlineColor(Color(0,0,0, (char)alpha));
-	}
+	current_speech.setFillColor(Color(0, 0, 0, (char)alpha));
+	person_name.setFillColor(Color(0,0,0, (char)alpha));
+	panel_shape.setOutlineColor(Color(0,0,0, (char)alpha));
 	
 	dark_background.setFillColor(Color(0, 0, 0, (char)dark_alpha));
 	
@@ -296,12 +288,12 @@ void panel::update(bool notInventary, person *character, int size){
 
 // функция отрисовки объектов.
 void panel::render(){
-	window.draw(dark_background);
+	if (isDarkness) window.draw(dark_background);
 	window.draw((*current_person).shape);
 	window.draw(panel_shape);
 	window.draw(current_speech);
 	window.draw(person_name);
-	if (help) window.draw(mouse_icon);
+	if (help && allowed) window.draw(mouse_icon);
 	if (!printing && alpha > 250) window.draw(arrows);
 }
 
@@ -363,12 +355,16 @@ void panel::anim_disappearing(){
 void panel::anim_appearing(){
 	if (alpha < 255){
 		alpha += anim_speed * 15 * deltaTime;
+		dark_alpha = 255 - alpha;
 		if (bar_position.y > center_bar_position.y){
 			bar_position.y -= anim_speed * deltaTime;
 			speech_position.y -= anim_speed * deltaTime;
 			name_position.y -= anim_speed * deltaTime;
 		}
-		if (alpha > 255) alpha = 255;
+		if (alpha > 255) {
+			alpha = 255;
+			dark_alpha = 0;
+		}
 	}
 	else{
 		APPEARING = false;

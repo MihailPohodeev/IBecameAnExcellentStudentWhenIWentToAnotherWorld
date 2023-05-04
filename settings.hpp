@@ -32,11 +32,14 @@ bool level2_5_start = true; // переход к уровню 2_5
 bool level3_start = true; // переход к уровню 3
 bool level4_start = true; // переход к уровню 4
 bool level5_start = true; // переход к уровню 5
+bool level5_5_start = true; // переход к уровню 5_5
+bool level6_start = true; // переход к уровню 5
 bool to_settings = false; // переход к настройкам
 
 Vector2i mouse_position; // позиция мыши
 Font main_font; // основной шрифт игры
 Color main_color = Color(255, 255, 255, 255); // главный цвет игры.
+enum direction {STOP, UP, DOWN, RIGHT, LEFT}; // перечислимый тип направления
 
 // создание окна
 RenderWindow window(VideoMode(WIDTH, HEIGHT), "I became an excelent student when I visited another world");

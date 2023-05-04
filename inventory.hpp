@@ -196,12 +196,15 @@ void inventory::trigger_notification(string str, object &obj, bool isItem){
 	static Clock timer;
 	double time_count = (double)timer.getElapsedTime().asMilliseconds() / 1000;
 	
+	
 	if(str != old_str){
+		cout<<"1"<<'\n';
 		if (isItem) add_item_object(obj);
 		else add_record_object(obj);
 		old_str = str;
 		timer.restart();
 		string new_str = "";
+		cout<<"2"<<'\n';
 		int new_line = (int)(notification_shape.getSize().x * 0.8f / (notif_text.getCharacterSize() * 1.5f));
 		int index = 0;
 		for(int i = 0; i < str.length(); i++){
@@ -217,7 +220,7 @@ void inventory::trigger_notification(string str, object &obj, bool isItem){
 		notif_text.setPosition(notif_text.getPosition().x, notification_shape.getPosition().y + notification_shape.getSize().y / 2 - (notif_text.getCharacterSize() * 1.5f));
 		notif_text.setString(new_str);
 	}
-	
+
 	if (time_count < 8){
 		if (notification_shape.getPosition().x + thick_size > WIDTH){
 			notification_shape.move(-anim_speed * 15 * deltaTime, 0);
@@ -249,8 +252,8 @@ void inventory::add_record_object(object &obj){
 
 // отрисовка элементов меню
 void inventory::render(){
-//	window.draw(notification_shape);
-//	window.draw(notif_text);
+	window.draw(notification_shape);
+	window.draw(notif_text);
 	window.draw(background);
 	window.draw(description_shape);
 	for (int i = 0; i < 8; i++){
