@@ -53,7 +53,6 @@ void check_mark::update(){
 			if (!onClick){
 				isOn = !isOn;
 				onClick = true;
-				cout<<isOn<<'\n';
 			}
 		} else onClick = false;
 	}

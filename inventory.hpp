@@ -35,12 +35,16 @@ class inventory{
 	
 public:
 	
+	Button *choose; // выбор файла
+	
 	void add_item_object(object &obj); // добавление объекта в инвентарь
 	void add_record_object(object &obj); // добавление записи в инвентарь
 	
 	bool isActive, // активен ли сейчас интерфейс
 	onPress, // для единоразового нажатие кнопки вызова интерфейса
-	onClick; // для единоразового нажатия ЛКМ
+	onClick, // для единоразового нажатия ЛКМ
+	start,
+	isInterrogation; // режим допроса
 	
 	void trigger_notification(string str, object &obj, bool isItem); // вызвать уведомление
 	void update(); // обновление
@@ -81,7 +85,7 @@ public:
 		max_line_len = WIDTH / 16;
 		
 		isActive = false;
-		onPress = onClick = false;
+		onPress = onClick = start = isInterrogation = false;
 		
 		current_category = ITEMS;
 		change_category = new Button(WIDTH * 0.25f, HEIGHT * 0.1f);
@@ -89,6 +93,12 @@ public:
 		(*change_category).setText("записи");
 		(*change_category).setTextSize((WIDTH + HEIGHT) / 2 * 0.03f);
 		(*change_category).isActive = false;
+		
+		choose = new Button(WIDTH * 0.15f, HEIGHT * 0.1f);
+		(*choose).setPosition(WIDTH * 3/4, description_shape.getPosition().y);
+		(*choose).setText("выбрать");
+		(*choose).setTextSize((WIDTH + HEIGHT) / 2 * 0.03f);
+		(*choose).isActive = false;
 		
 		description.setFont(main_font);
 		description.setFillColor(Color(0, 0, 0, 0));
@@ -110,7 +120,7 @@ void inventory::update(){
 	anim_time = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
 	
 	// активация инвентаря по нажатию кнопки "E"
-	if(Keyboard::isKeyPressed(Keyboard::Q) || Joystick::isButtonPressed(0, 0)){
+	if(Keyboard::isKeyPressed(Keyboard::Q) || Joystick::isButtonPressed(0, 0) || start){
 		if(!onPress){
 			isActive = !isActive;
 			clock.restart();
@@ -125,6 +135,7 @@ void inventory::update(){
 		else{
 			alpha = max_darkness;
 			(*change_category).isActive = true;
+			if (isInterrogation) (*choose).isActive = true;
 			for (char i = 0; i < 8; i++) slots[i].isActive = true;
 		}
 		
@@ -133,12 +144,10 @@ void inventory::update(){
 				if (current_category == ITEMS){
 					current_category = RECORDS;
 					(*change_category).setText("предметы");
-					cout<<"items\n";
 				}
 				else{
 					current_category = ITEMS;
 					(*change_category).setText("записи");
-					cout<<"records\n";
 				}
 				onClick = true;
 			}
@@ -148,6 +157,7 @@ void inventory::update(){
 	}
 	else {
 		(*change_category).isActive = false;
+		if (isInterrogation) (*choose).isActive = false;
 		if (alpha > 0){
 			for (char i = 0; i < 8; i++) slots[i].isActive = false;
 			alpha -= anim_speed * anim_time;
@@ -159,11 +169,15 @@ void inventory::update(){
 		if (slots[i].onClick()){
 			if (!isClickSlot[i]){
 				description.setString(cut_text((current_category == RECORDS) ? records[i].description : items[i].description));
-				cout<<"Da"<<'\n';
 			}
 			isClickSlot[i] = true;
 		}
 		else isClickSlot[i] = false;
+	}
+	
+	if (Keyboard::isKeyPressed(Keyboard::Escape)) {
+		isActive = false;
+		start = false;
 	}
 	
 	background.setFillColor(Color(0, 0, 0, (char)alpha));
@@ -180,7 +194,6 @@ string inventory::cut_text(string str){
 	for(int i = 0; i < str.length(); i++){
 		result += str[i];
 		if (line_len > max_line_len && str[i] == ' '){
-			cout<<line_len<<'\n';
 			result += '\n';
 			line_len = 0;
 		}
@@ -198,13 +211,11 @@ void inventory::trigger_notification(string str, object &obj, bool isItem){
 	
 	
 	if(str != old_str){
-		cout<<"1"<<'\n';
 		if (isItem) add_item_object(obj);
 		else add_record_object(obj);
 		old_str = str;
 		timer.restart();
 		string new_str = "";
-		cout<<"2"<<'\n';
 		int new_line = (int)(notification_shape.getSize().x * 0.8f / (notif_text.getCharacterSize() * 1.5f));
 		int index = 0;
 		for(int i = 0; i < str.length(); i++){
@@ -256,6 +267,7 @@ void inventory::render(){
 	window.draw(notif_text);
 	window.draw(background);
 	window.draw(description_shape);
+	(*choose).update();
 	for (int i = 0; i < 8; i++){
 		slots[i].render();
 		if (alpha > max_darkness * 0.8f){

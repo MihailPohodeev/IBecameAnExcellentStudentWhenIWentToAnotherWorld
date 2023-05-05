@@ -13,8 +13,13 @@ public:
 	
 	bool more; // больше информации
 	bool isInterrogation; // режим допроса
+	bool isCorrect; // верно ли выбрана позиция возражения
 	
 	float green_level; // уровень зеленого цвета
+	
+	inventory _inventory;
+	
+	int interrog_act, true_act;
 	
 	interrogation() : panel() {
 		
@@ -22,6 +27,8 @@ public:
 		
 		more = false;
 		isInterrogation = false;
+		
+		_inventory.isInterrogation = true;
 		
 		symbols_count = WIDTH * 0.65f / text_speech_size;
 		
@@ -60,93 +67,98 @@ void interrogation::update(bool notInventary, person *character, int size){
 				
 					if ((*more_details).onClick() && current_text.length() != 0){
 						(*more_details).isActive = false;
+						(*objection).isActive = false;
 						more = true;
 					}
 					
-//					script.clear();
-//					script.seekg(0);
-					getline(script, script_text);
-					printing_delay = 0.05f;
-					bool isAct = false;
-					string act_str = current_text = name_text = "";
-					thinking = false;
-					bool name = false;
-					string speech = "";
-					if (!more){
+					if ((*objection).onClick()){
+						_inventory.start = true;
+					}
+					else if(!_inventory.isActive){
+						getline(script, script_text);
+						printing_delay = 0.05f;
+						bool isAct = false;
+						string act_str = current_text = name_text = "";
+						thinking = false;
+						bool name = false;
+						string speech = "";
+						if (!more){
+							
+							(*more_details).isActive = true;
+							(*objection).isActive = true;
+							while(script_text[0] != '[')
+								getline(script, script_text);
+								
+							for (int i = 0; i < script_text.length(); i++){
+								if (script_text[i] == '['){
+									isAct = true;
+									continue;
+								}
+								else if (script_text[i] == ']'){
+									isAct = false;
+									act = stoi(act_str);
+									continue;
+								}
+								else if (script_text[i] == '<') {
+									name = true;
+									continue;
+								} 
+								else if (script_text[i] == '>') {
+									name = false;
+									continue;
+								}
+								
+								if (script_text[i] == '@') thinking = true;
+								
+								if (isAct) act_str += script_text[i];
+								else if (name) name_text += script_text[i];
+								else if ((name == false) && (script_text[i] != '@') && (script_text[i] != '%')) speech += script_text[i];
+							}
+							script_text = speech;
+							printing = true;
+						}
+						else{
+							for (int i = 0; i < script_text.length(); i++){
+								if (script_text[i] == '{'){
+									continue;
+								}
+								else if (script_text[i] == '}'){
+									more = false;
+									continue;
+								}
+								else if (script_text[i] == '<') {
+									name = true;
+									continue;
+								} 
+								else if (script_text[i] == '>') {
+									name = false;
+									continue;
+								}
+								
+								if (name) name_text += script_text[i];
+								if (script_text[i] == '@') thinking = true;
+								if ((name == false) && (script_text[i] != '@') && (script_text[i] != '%')) speech += script_text[i];
+							}
+							script_text = speech;
+							printing = true;
+						}
 						
-						(*more_details).isActive = true;
-						while(script_text[0] != '[')
-							getline(script, script_text);
-							
-						for (int i = 0; i < script_text.length(); i++){
-							if (script_text[i] == '['){
-								isAct = true;
-								continue;
-							}
-							else if (script_text[i] == ']'){
-								isAct = false;
-								act = stoi(act_str);
-								continue;
-							}
-							else if (script_text[i] == '<') {
-								name = true;
-								continue;
-							} 
-							else if (script_text[i] == '>') {
-								name = false;
-								continue;
-							}
-							
-							if (script_text[i] == '@') thinking = true;
-							
-							if (isAct) act_str += script_text[i];
-							else if (name) name_text += script_text[i];
-							else if ((name == false) && (script_text[i] != '@') && (script_text[i] != '%')) speech += script_text[i];
+						if (script_text.length() == 0) {
+							(*current_person).isActive = false;
+							isActive = false;
+							DISAPPEARING = true;
+							return;
 						}
-						script_text = speech;
-						printing = true;
-					}
-					else{
-						for (int i = 0; i < script_text.length(); i++){
-							if (script_text[i] == '{'){
-								continue;
-							}
-							else if (script_text[i] == '}'){
-								more = false;
-								continue;
-							}
-							else if (script_text[i] == '<') {
-								name = true;
-								continue;
-							} 
-							else if (script_text[i] == '>') {
-								name = false;
-								continue;
-							}
-							
-							if (name) name_text += script_text[i];
-							if (script_text[i] == '@') thinking = true;
-							if ((name == false) && (script_text[i] != '@') && (script_text[i] != '%')) speech += script_text[i];
-						}
-						script_text = speech;
-						printing = true;
-					}
-					
-					if (script_text.length() == 0) {
+						
 						(*current_person).isActive = false;
-						isActive = false;
-						DISAPPEARING = true;
-						return;
+						// выбор текущего персонажа исходя из имени текущего спикера
+						for(int i = 0; i < size; i++){
+							if(character[i].name == name_text){
+								current_person = &character[i];
+								(*current_person).isActive = true;
+							}
+						}	
 					}
-					
-					(*current_person).isActive = false;
-					// выбор текущего персонажа исходя из имени текущего спикера
-					for(int i = 0; i < size; i++){
-						if(character[i].name == name_text){
-							current_person = &character[i];
-							(*current_person).isActive = true;
-						}
-					}	
 				}
 				else {
 					printing_delay = 0.01f;
@@ -165,11 +177,23 @@ void interrogation::update(bool notInventary, person *character, int size){
 		left_click = true;
 	}
 	
-	if (isInterrogation){
-		(*objection).isActive = true;
+	if (isInterrogation){		
+		if(!more) (*objection).isActive = true;
 		
 		if (green_level < 128) green_level += anim_speed * 5 * deltaTime;
 		else green_level = 128;
+		
+		if (act == interrog_act) {
+			script.clear();
+			script.seekg(0);
+		}
+		
+		if (_inventory.isActive){
+			if ((*_inventory.choose).onClick()){
+				if(act == true_act) cout<<"Da!"<<'\n';
+				else cout<<"No!"<<'\n';
+			}
+		}
 	}
 	else {
 		(*objection).isActive = false;
@@ -177,7 +201,7 @@ void interrogation::update(bool notInventary, person *character, int size){
 		if (green_level > 0) green_level -= anim_speed * 5 * deltaTime;
 		else green_level = 0;
 		
-		if (act == 5) {
+		if (act == interrog_act) {
 			isInterrogation = true;
 			script.clear();
 			script.seekg(0);
@@ -205,6 +229,8 @@ void interrogation::update(bool notInventary, person *character, int size){
 	if (speaking) (*current_person).isSpeaking = true;
 	else (*current_person).isSpeaking = false;
 	(*current_person).update();
+	
+	_inventory.update();
 	
 	current_speech.setFillColor(Color(0, (char)green_level, 0, (char)alpha));
 	person_name.setFillColor(Color(0, (char)green_level, 0, (char)alpha));
@@ -235,4 +261,5 @@ void interrogation::render(){
 	if (help) window.draw(mouse_icon);
 	(*objection).update();
 	(*more_details).update();
+	_inventory.render();
 }

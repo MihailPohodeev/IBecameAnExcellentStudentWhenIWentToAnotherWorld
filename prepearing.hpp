@@ -755,6 +755,14 @@ namespace constructor{
 		
 		main_bar.current_person = &character[0];
 		
+		RectangleShape background; // форма заднего фона
+		Texture texture;
+		texture.loadFromFile("Sprites/prison.jpg");
+		
+		background_init(texture, background);
+		
+		main_bar.isDark = false;
+		
 		while (window.isOpen() && level3_start)
 	    {
 	        clock.restart();
@@ -766,10 +774,24 @@ namespace constructor{
 	                window.close();
 	        }
 	        
-	        main_bar.update(false, character, 2);
+	        background_movement(background);
+	        
+	        main_bar.update(false, character, 3);
+	        
+			if (main_bar.act == 3){
+				main_bar.isActive = false;
+				main_bar.DISAPPEARING = main_bar.isDark = true;
+				if (main_bar.alpha < 2){
+					level3_start = false;
+					level5_start = true;
+					break;
+				}
+			}
+	        
 	        
 	        window.clear();
 	        window.setView(view);
+	        window.draw(background);
 	        main_bar.render();
 	        window.display();
 	        
@@ -832,7 +854,9 @@ namespace constructor{
 		
 		interrogation *main_bar = new interrogation();
 		(*main_bar).script.open("Scripts/Script5.txt");
-		inventory _inventory;
+		
+		(*main_bar).interrog_act = 5;
+		(*main_bar).true_act = 1;
 		
 		person character[2];
 		
@@ -868,11 +892,9 @@ namespace constructor{
 		
 			background_movement(background);
 			
-			_inventory.update();
-			(*main_bar).update(_inventory.isActive, character, 2);
+			(*main_bar).update(false, character, 2);
 			
 			if ((*main_bar).act == 9) {
-				cout<<(*main_bar).act<<'\n';
 				(*main_bar).isActive = false;
 				(*main_bar).DISAPPEARING = true;
 			}
@@ -881,7 +903,6 @@ namespace constructor{
 	        window.setView(view);
 	        window.draw(background);
 	        (*main_bar).render();
-	        _inventory.render();
 	        window.display();
 	        
 	        
