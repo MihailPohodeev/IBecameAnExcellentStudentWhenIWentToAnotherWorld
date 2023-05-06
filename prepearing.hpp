@@ -277,6 +277,8 @@ namespace constructor{
 		
 		(main_bar.current_person) = &character[0];
 		
+		main_bar.isDark = false;
+		main_bar.dark_alpha = 0;		
 		
 		Texture back_texture; // текстура заднего фона в корридоре
 		Texture classroom_texture; // текстура заднего фона в аудитории
@@ -321,7 +323,7 @@ namespace constructor{
 			background_movement(background);
 			
 			
-			if ((main_bar.dark_alpha >= 254) && (main_bar.act > 0) && (!main_bar.isActive)){
+			if ((main_bar.dark_alpha >= 254) && (main_bar.act > 0) && (!main_bar.isActive)){				
 				if (main_bar.act == 1) background_init(back_texture, background);
 				else if (main_bar.act == 2) {
 					background_init(classroom_texture, background);
@@ -330,7 +332,7 @@ namespace constructor{
 				main_bar.isDark = false;
 			}
 			
-			if (main_bar.act == 3){				
+			if (main_bar.act == 3){							
 				if (alpha < 253.f){
 					volume -= anim_speed * 2 * deltaTime;
 					alpha += anim_speed * 5 * deltaTime;

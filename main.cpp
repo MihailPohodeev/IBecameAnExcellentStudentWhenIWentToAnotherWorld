@@ -44,12 +44,12 @@ int main()
 		view.setCenter(Vector2f(WIDTH / 2, HEIGHT / 2));
 //	    constructor::menu();
 //	    if (to_settings) constructor::settings();
-//	  	if (level1_start) constructor::level1();
-//		if (level2_start) constructor::level2();
-//		if (level2_5_start) constructor::level2_5();
-//		if (level3_start) constructor::level3();
+	  	if (level1_start) constructor::level1();
+		if (level2_start) constructor::level2();
+		if (level2_5_start) constructor::level2_5();
+		if (level3_start) constructor::level3();
 //		if (level4_start) constructor::level4();
-//		if (level5_start) constructor::level5();
+		if (level5_start) constructor::level5();
 		if (level5_5_start) constructor::level5_5();
 		if (level6_start) constructor::level6();
 //		constructor::level2();

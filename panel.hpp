@@ -217,7 +217,7 @@ void panel::update(bool notInventary, person *character, int size){
 	if(alpha > 2) help = false;
 	else help = true;
 	
-	
+	cout<<dark_alpha<<'\n';
 	
 	if (((double)anim_clock.getElapsedTime().asMicroseconds() / 1000000) > 1) {
 		mouse_icon.setTextureRect(mouse_sprites[1]);
@@ -355,7 +355,7 @@ void panel::anim_disappearing(){
 void panel::anim_appearing(){
 	if (alpha < 255){
 		alpha += anim_speed * 15 * deltaTime;
-		dark_alpha = 255 - alpha;
+//		dark_alpha = 255 - alpha;
 		if (bar_position.y > center_bar_position.y){
 			bar_position.y -= anim_speed * deltaTime;
 			speech_position.y -= anim_speed * deltaTime;
