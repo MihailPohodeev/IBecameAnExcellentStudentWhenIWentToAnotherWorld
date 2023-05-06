@@ -936,6 +936,15 @@ namespace constructor{
 		
 		main_bar.current_person = &character[0];
 		
+		RectangleShape background; // форма заднего фона
+		Texture texture;
+		texture.loadFromFile("Sprites/prison.jpg");
+		
+		background_init(texture, background);
+		
+		main_bar.isDark = false;
+		main_bar.isDarkness = false;
+		
 		while (window.isOpen() && level5_5_start)
 	    {
 	        clock.restart();
@@ -947,15 +956,24 @@ namespace constructor{
 	                window.close();
 	        }
 	        
+	        background_movement(background);
+	        
 	        main_bar.update(false, character, 2);
 	        if(main_bar.act == 1){
-	        	level5_5_start = false;
-	        	level6_start = true;
+	        	main_bar.isActive = false;
+	        	main_bar.DISAPPEARING = true;
+	        	main_bar.isDarkness = true;
+	        	main_bar.isDark = true;
+	        	if (main_bar.alpha < 3){
+	        		level5_5_start = false;
+	        		level6_start = true;
+	        	}
 			}
 	        
 	        window.clear();
 	        window.setView(view);
-	        main_bar.render();
+	        window.draw(background);
+			main_bar.render();
 	        window.display();
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
