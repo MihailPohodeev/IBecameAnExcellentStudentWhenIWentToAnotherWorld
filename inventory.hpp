@@ -63,6 +63,8 @@ public:
 		slots[6].setPosition(WIDTH * 3 / 5, HEIGHT * 0.7f);
 		slots[7].setPosition(WIDTH * 4 / 5, HEIGHT * 0.7f);
 		
+		for (char i = 0; i < 8; i++) slots[i].isActive = false;
+		
 		background.setSize(Vector2f(WIDTH, HEIGHT));
 		background.setFillColor(Color(0, 0, 0, 0));
 		
@@ -129,8 +131,8 @@ void inventory::update(){
 			onPress = true;
 			if (isInterrogation && start) {
 				(*choose).isActive = true;
-				max_line_len = WIDTH / 25;
-			} else max_line_len = WIDTH / 16;
+				max_line_len = WIDTH * 0.6f / ((HEIGHT + WIDTH) / 2 * 0.025f);
+			} else max_line_len = WIDTH * 0.8f / ((HEIGHT + WIDTH) / 2 * 0.025f);;
 			start = false;
 		}
 	} else onPress = false;
@@ -280,11 +282,13 @@ void inventory::render(){
 	window.draw(background);
 	window.draw(description_shape);
 	(*choose).update();
-	for (int i = 0; i < 8; i++){
-		slots[i].render();
-		if (alpha > max_darkness * 0.8f){
-			if(i < records_count && current_category == RECORDS) window.draw(records[i].shape);
-			if(i < items_count && current_category == ITEMS) window.draw(items[i].shape);
+	if (isActive){
+		for (int i = 0; i < 8; i++){
+			slots[i].render();
+			if (alpha > max_darkness * 0.8f){
+				if(i < records_count && current_category == RECORDS) window.draw(records[i].shape);
+				if(i < items_count && current_category == ITEMS) window.draw(items[i].shape);
+			}
 		}
 	}
 	window.draw(description);

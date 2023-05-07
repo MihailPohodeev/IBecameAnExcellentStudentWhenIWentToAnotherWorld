@@ -43,15 +43,97 @@ int main()
 	while(window.isOpen()){
 		view.setCenter(Vector2f(WIDTH / 2, HEIGHT / 2));
 	    constructor::menu();
-//	    if (to_settings) constructor::settings();
+	    if (to_settings) constructor::settings();
 	  	if (level1_start) constructor::level1();
 		if (level2_start) constructor::level2();
 		if (level2_5_start) constructor::level2_5();
-		if (level3_start) constructor::level3();
+		if (level3_start) {
+			panel main_bar;
+			scene_menu SceneMenu;
+			
+			main_bar.script.open("Scripts/Script4.txt");
+			
+			Music music;
+			music.openFromFile("Music/Halt_-This-Instant__v1__1.ogg");
+			music.setVolume(50.f);
+			music.setLoop(true);
+			music.play();
+			
+			person character[3];
+			
+			character[0].name = "виктор";
+			character[0].say_txt.loadFromFile("Sprites/victor_say.png");
+			character[0].think_txt.loadFromFile("Sprites/victor_think.png");
+			character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
+			character[0].setPosition(main_bar.current_left_positoin);
+			
+			character[1].name = "эмрис";
+			character[1].setPosition(main_bar.current_right_positoin);
+			character[1].say_txt.loadFromFile("Sprites/Emris_say.png");
+			character[1].say[0] = IntRect(230, 0, 115, 256);
+			character[1].say[1] = IntRect(345, 0, 115, 256);
+			character[1].idle_rect[0] = IntRect(0, 0, 115, 256);
+			character[1].idle_rect[1] = IntRect(345, 0, 115, 256);
+			
+			character[2].name = "зендей";
+			character[2].setPosition(main_bar.current_right_positoin);
+			
+			main_bar.current_person = &character[0];
+			
+			RectangleShape background; // форма заднего фона
+			Texture texture;
+			texture.loadFromFile("Sprites/hallway.png");
+			
+			background_init(texture, background);
+			
+			main_bar.isDark = false;
+			
+			while (window.isOpen() && level3_start)
+		    {
+		        constructor::clock.restart();
+		        
+				Event event;
+		        while (window.pollEvent(event))
+		        {
+		            if (event.type == sf::Event::Closed)
+		                window.close();
+		        }
+		        
+		        mouse_position = Mouse::getPosition(window);
+		        SceneMenu.update();
+		        
+		        if (!SceneMenu.isActive){
+				
+					constructor::background_movement(background);
+			        
+			        main_bar.update(false, character, 3);
+			        
+					if (main_bar.act == 3){
+						main_bar.isActive = false;
+						main_bar.DISAPPEARING = main_bar.isDark = true;
+						if (main_bar.alpha < 2){
+							level3_start = false;
+							level5_start = true;
+							break;
+						}
+					}
+		    	}
+		        
+		        window.clear();
+		        window.setView(view);
+		        window.draw(background);
+		        main_bar.render();
+		        SceneMenu.render();
+		        window.display();
+		        
+		        deltaTime = (double)constructor::clock.getElapsedTime().asMicroseconds() / 1000000;
+			}
+		}
 //		if (level4_start) constructor::level4();
 		if (level5_start) constructor::level5();
 		if (level5_5_start) constructor::level5_5();
 		if (level6_start) constructor::level6();
+		if (level7_start) constructor::level7();
 //		constructor::level2();
 	}
 	

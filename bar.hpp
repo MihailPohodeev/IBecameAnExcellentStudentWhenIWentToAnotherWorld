@@ -18,9 +18,7 @@ namespace level2_nmspc{
 		double alpha; // степень прозрачности панели
 		double x, y; // координаты панели
 		double speed; // скорость анимации
-		double delta_time_text_animation; // время для набора одной буквы
-		
-		fstream script; // поток сценария
+		double delta_time_text_animation; // время для набора одной буквы		
 		
 		string script_text; // строка сценария
 		string current_speech; // текущая речь персонажа
@@ -34,6 +32,8 @@ namespace level2_nmspc{
 		void text_animation(string str); // анимация набора сценария
 		
 	public:
+		
+		fstream script; // поток сценария
 		
 		bool isActive; // активна ли в данный момент панель
 		
@@ -73,7 +73,7 @@ namespace level2_nmspc{
 			x = WIDTH / 2;
 			y = HEIGHT - (WIDTH - shape.getSize().x) / 2;
 			
-			max_lenght = WIDTH / 13.66f;
+			max_lenght = WIDTH * 0.82f / ((HEIGHT + WIDTH) / 2 * 0.025f);
 			script_act = 0;
 			
 			speed = WIDTH / 4.f;

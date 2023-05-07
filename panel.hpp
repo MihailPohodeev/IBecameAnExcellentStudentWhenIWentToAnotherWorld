@@ -159,7 +159,7 @@ public:
 		
 		buffer.loadFromFile("Sounds/text.ogg");
 		text_appearence.setBuffer(buffer);
-		text_appearence.setVolume(5.f);
+		text_appearence.setVolume(20.f);
 	}
 };
 
@@ -270,9 +270,6 @@ void panel::update(bool notInventary, person *character, int size){
 	current_speech.setPosition(speech_position);
 	person_name.setPosition((*current_person).shape.getPosition().x, name_position.y);
 	
-//	current_speech.setString(String::fromUtf8(current_text.begin(), current_text.end()));
-//	person_name.setString(String::fromUtf8(name_text.begin(), name_text.end()).toAnsiString());
-	
 	current_speech.setString(current_text);
 	person_name.setString(name_text);
 	
@@ -376,6 +373,14 @@ void panel::anim_text(){
 	static int line_breaks_count = 0; // количество переводов на новую строки
 	static bool isBreaking = false; // перенесена ли строка хотя бы раз
 	
+	// если количество символов в строке закончилось
+	if (i >= script_text.length()){
+		i = 0;
+		line_breaks_count = 0;
+		printing = isBreaking = false;
+		return;
+	}
+	
 	time_for_printing = (double)clock_for_printing.getElapsedTime().asMicroseconds() / 1000000; // время, прощедшее с момента печати последнего символа, в секундах
 	if (time_for_printing >= printing_delay) {
 		
@@ -383,7 +388,7 @@ void panel::anim_text(){
 		if (printing_delay > 0.03f)	text_appearence.play();
 		
 		// перевод на новую строку
-		if ((line_breaks_count > symbols_count) && (script_text[i] == ' ')) {
+		if ((line_breaks_count >= symbols_count) && (script_text[i] == ' ')) {
 			current_text += '\n';
 			line_breaks_count = 0;
 			isBreaking = true;
@@ -397,12 +402,7 @@ void panel::anim_text(){
 		if (!isBreaking) current_speech.setOrigin(Vector2f(text_speech_size * current_text.length() / 3.f, text_speech_size));
 	}
 	
-	// если количество символов в строке закончилось
-	if (i >= script_text.length()){
-		i = 0;
-		line_breaks_count = 0;
-		printing = isBreaking = false;
-	}
+	
 }
 
 

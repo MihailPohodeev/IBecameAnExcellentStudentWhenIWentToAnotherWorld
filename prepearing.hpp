@@ -74,12 +74,11 @@ namespace constructor{
 		exit.setTextSize((WIDTH + HEIGHT) / 2 * 0.03f);
 		
 		start.setPosition(WIDTH / 2, HEIGHT / 2);
-    	settings.setPosition(WIDTH / 2, start.getPosition().y + start.getSize().y * 1.5f);
-		exit.setPosition(WIDTH / 2, settings.getPosition().y + settings.getSize().y * 1.5f);
+    	exit.setPosition(WIDTH / 2, start.getPosition().y + start.getSize().y * 1.5f);
 		
 		Texture back_texture;
 	    RectangleShape background;
-	    back_texture.loadFromFile("Sprites/background.jpg");
+	    back_texture.loadFromFile("Sprites/background.png");
 	    
 	    // масштабирование заднего фона
     	background_init(back_texture, background);
@@ -118,18 +117,18 @@ namespace constructor{
 			} else startIsClick = false;
 	        
 	        // при нажатии кнопки "настройки"
-	        if ((settings.onClick() || Keyboard::isKeyPressed(Keyboard::Space))) {
-	        	if (!isClick){
-					anim = !anim;
-					to_settings = true;
-	        		isClick = true;
-	        	}
-			} else isClick = false;
+//	        if ((settings.onClick() || Keyboard::isKeyPressed(Keyboard::Space))) {
+//	        	if (!isClick){
+//					anim = !anim;
+//					to_settings = true;
+//	        		isClick = true;
+//	        	}
+//			} else isClick = false;
 			
 			// при нажатии кнопки "выход"
 			if (exit.onClick()) window.close();
 			
-			disappearing(anim, start, settings, exit); 
+			disappearing(anim, start, exit, exit); 
 			
 			if(to_settings && !exit.isActive && exit.alpha == 0){
 				break;
@@ -146,7 +145,7 @@ namespace constructor{
 		    window.setView(view);
 		    window.draw(background);
 			start.update();
-			settings.update();
+//			settings.update();
 			exit.update();
 			window.draw(title);
 	        window.display();
@@ -163,8 +162,8 @@ namespace constructor{
 		
 		Texture back_texture;
 	    RectangleShape background;
-	    back_texture.loadFromFile("Sprites/background.jpg");
-	    if (!back_texture.loadFromFile("Sprites/background.jpg")) cout<<"background picture loading failed"<<'\n';
+	    back_texture.loadFromFile("Sprites/background.png");
+	    if (!back_texture.loadFromFile("Sprites/background.png")) cout<<"background picture loading failed"<<'\n';
 	    else cout<<"background picture loaded succsessfully"<<'\n';
 	    
 	    Text screen_size;
@@ -262,6 +261,7 @@ namespace constructor{
 	void level1(){
 		
 		panel main_bar; // панель диалогов
+		scene_menu SceneMenu;
 		Clock fps_clock; // часы для просчёта количества кадров в секунду
 		Clock final_darkness; // таймер для затемнения
 		Text fps_text; // текст отображения fps
@@ -332,7 +332,7 @@ namespace constructor{
 	    RectangleShape background; // форма заднего фона
 	    
 	    // загрузка изображений
-	    if (!back_texture.loadFromFile("Sprites/background.jpg")) cout<<"background picture loading failed"<<'\n';
+	    if (!back_texture.loadFromFile("Sprites/background.png")) cout<<"background picture loading failed"<<'\n';
 	    else cout<<"background picture loaded succsessfully"<<'\n';
 	    if (!classroom_texture.loadFromFile("Sprites/classroom.jpg")) cout<<"classroom picture loading failed"<<'\n';
 	    else cout<<"classroom picture loaded succsessfully"<<'\n';
@@ -364,63 +364,69 @@ namespace constructor{
 			// получение позиции мыши
 			mouse_position = Mouse::getPosition(window);
 			
-			main_bar.update(false, character, 4);
-			background_movement(background);
+			SceneMenu.update();
+			if (!SceneMenu.isActive){
+				main_bar.update(false, character, 4);
+				background_movement(background);
 			
-			
-			if ((main_bar.dark_alpha >= 254) && (main_bar.act > 0) && (!main_bar.isActive)){				
-				if (main_bar.act == 1) background_init(back_texture, background);
-				else if (main_bar.act == 2) {
-					character[3].shape.setSize(Vector2f(WIDTH * 0.4f, HEIGHT * 0.8f));
-					character[3].setOrigin(Vector2f(character[3].shape.getSize().x, character[3].shape.getSize().y));
-					character[3].shape.setPosition(main_bar.panel_shape.getPosition().x + main_bar.panel_shape.getSize().x, character[3].shape.getPosition().y);
-					background_init(classroom_texture, background);
-					for (int i = 0; i < 3; i++) character[i].isSitting = true;
-				}
-				main_bar.isDark = false;
-			}
-			
-			if (main_bar.act == 3) {					
 				
-				character[0].shape.setTextureRect(finalRect);
-			
-				if (alpha < 253.f){
-					volume -= anim_speed * 2 * deltaTime;
-					alpha += anim_speed * 5 * deltaTime;
-					dark.setFillColor(Color(0, 0, 0, char(alpha)));
-					final_darkness.restart();
-					if(alpha > 254) alpha = 255;
+				
+				if ((main_bar.dark_alpha >= 254) && (main_bar.act > 0) && (!main_bar.isActive)){				
+					if (main_bar.act == 1) background_init(back_texture, background);
+					else if (main_bar.act == 2) {
+						character[3].shape.setSize(Vector2f(WIDTH * 0.4f, HEIGHT * 0.8f));
+						character[3].setOrigin(Vector2f(character[3].shape.getSize().x, character[3].shape.getSize().y));
+						character[3].shape.setPosition(main_bar.panel_shape.getPosition().x + main_bar.panel_shape.getSize().x, character[3].shape.getPosition().y);
+						background_init(classroom_texture, background);
+						for (int i = 0; i < 3; i++) character[i].isSitting = true;
+					}
+					main_bar.isDark = false;
 				}
-				else{
-					if((int)(((double)final_darkness.getElapsedTime().asMilliseconds() / 1000) / 0.25f) % 2 == 0){
-						dark.setFillColor(Color(0, 0, 0, 255));
+				
+				if (main_bar.act == 3) {					
+					
+					character[0].shape.setTextureRect(finalRect);
+				
+					if (alpha < 253.f){
+						volume -= anim_speed * 2 * deltaTime;
+						alpha += anim_speed * 5 * deltaTime;
+						dark.setFillColor(Color(0, 0, 0, char(alpha)));
+						final_darkness.restart();
+						if(alpha > 254) alpha = 255;
 					}
 					else{
-						dark.setFillColor(Color(255, 255, 255, 255));
-					}
-					if ((double)final_darkness.getElapsedTime().asMilliseconds() / 1000 > 1 && volume <= 0){
-						level1_start = false;
-						level2_start = true;
+						if((int)(((double)final_darkness.getElapsedTime().asMilliseconds() / 1000) / 0.25f) % 2 == 0){
+							dark.setFillColor(Color(0, 0, 0, 255));
+						}
+						else{
+							dark.setFillColor(Color(255, 255, 255, 255));
+						}
+						if ((double)final_darkness.getElapsedTime().asMilliseconds() / 1000 > 1 && volume <= 0){
+							level1_start = false;
+							level2_start = true;
+							main_bar.script.close();
+						}
 					}
 				}
-			}
-			else {
-				if (old_act != main_bar.act){
-					// затемнение заднего фона
-					main_bar.isDark = true;
-					// исчезновение панели диалогов
-					main_bar.DISAPPEARING = true;
+				else {
+					if (old_act != main_bar.act){
+						// затемнение заднего фона
+						main_bar.isDark = true;
+						// исчезновение панели диалогов
+						main_bar.DISAPPEARING = true;
+					}
 				}
+				
+				music.setVolume(volume);
 			}
-			
-			music.setVolume(volume);
 			
 	        window.clear();
 	        window.setView(view);
 	        window.draw(background);
 			main_bar.render();
 			window.draw(dark);
-			window.draw(fps_text);
+//			window.draw(fps_text);
+			SceneMenu.render();
 	        window.display();
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
@@ -488,10 +494,10 @@ namespace constructor{
 		
 		// триггер удостоверения личности
 		trigger identity_card = trigger(WIDTH / 8, HEIGHT / 10);
-		identity_card.setPosition(WIDTH * 0.8f, HEIGHT * 0.6f);
+		identity_card.setPosition(WIDTH * 0.6f, HEIGHT * 0.85f);
 		
-		trigger window_view = trigger(WIDTH / 4, HEIGHT / 10);
-		window_view.setPosition(WIDTH / 2, HEIGHT / 2);
+		trigger window_view = trigger(WIDTH / 10, HEIGHT / 5);
+		window_view.setPosition(WIDTH * 0.15f, HEIGHT * 0.7f);
 		
 		// объект персонажа и диалоговой панели
 		level2_nmspc::main_player hero; // персонаж
@@ -516,7 +522,7 @@ namespace constructor{
 		Texture background_image;
 		Texture window_view_image;
 		
-		background_image.loadFromFile("Sprites/background2.jpg");
+		background_image.loadFromFile("Sprites/background2.png");
 		window_view_image.loadFromFile("Sprites/window_view.png");
 		
 		background_init(background_image, background);	
@@ -712,6 +718,7 @@ namespace constructor{
 					if (alpha >= 255){
 						level2_start = false;
 						level2_5_start = true;
+						bar.script.close();
 					}
 				}
 				
@@ -725,7 +732,7 @@ namespace constructor{
 			if(!sceneMenu.isActive){
 				hero.update();
 		        bar.update();
-		        _inventory.update();
+		        if (!bar.isActive) _inventory.update();
 		        if(bar.isActive) _inventory.isActive = false;
 	    	}
 	    	else {
@@ -813,6 +820,7 @@ namespace constructor{
 	        	if (main_bar.alpha < 5){
 	        		level2_5_start = false;
 	        		level3_start = true;
+	        		main_bar.script.close();
 				}
 			}
 	        
@@ -820,80 +828,6 @@ namespace constructor{
 	        window.setView(view);
 	        main_bar.render();
 	        sceneMenu.render();
-	        window.display();
-	        
-	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
-		}
-	}
-	
-	void level3(){
-		
-		panel main_bar;
-		
-		main_bar.script.open("Scripts/Script4.txt");
-		
-		person character[3];
-		
-		character[0].name = "виктор";
-		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
-		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
-		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
-		character[0].setPosition(main_bar.current_left_positoin);
-		
-		character[1].name = "эмрис";
-		character[1].setPosition(main_bar.current_right_positoin);
-		character[1].say_txt.loadFromFile("Sprites/Emris_say.png");
-		character[1].say[0] = IntRect(230, 0, 115, 256);
-		character[1].say[1] = IntRect(345, 0, 115, 256);
-		character[1].idle_rect[0] = IntRect(0, 0, 115, 256);
-		character[1].idle_rect[1] = IntRect(345, 0, 115, 256);
-		
-		character[2].name = "зендей";
-		character[2].setPosition(main_bar.current_right_positoin);
-		
-		main_bar.current_person = &character[0];
-		
-		RectangleShape background; // форма заднего фона
-		Texture texture;
-		texture.loadFromFile("Sprites/prison.jpg");
-		
-		background_init(texture, background);
-		
-		main_bar.isDark = false;
-		
-		while (window.isOpen() && level3_start)
-	    {
-	        clock.restart();
-	        
-			Event event;
-	        while (window.pollEvent(event))
-	        {
-	            if (event.type == sf::Event::Closed)
-	                window.close();
-	        }
-	        
-	        background_movement(background);
-	        
-	        main_bar.update(false, character, 3);
-	        
-	        if (main_bar.act == 2 && (*main_bar.current_person).name != character[1].name){
-	        	character[1].setPosition(Vector2f((main_bar.current_left_positoin.x + main_bar.current_right_positoin.x) / 2, main_bar.current_left_positoin.y));
-			}
-			else if (main_bar.act == 3){
-				main_bar.isActive = false;
-				main_bar.DISAPPEARING = main_bar.isDark = true;
-				if (main_bar.alpha < 2){
-					level3_start = false;
-					level5_start = true;
-					break;
-				}
-			}
-	        
-	        
-	        window.clear();
-	        window.setView(view);
-	        window.draw(background);
-	        main_bar.render();
 	        window.display();
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
@@ -954,6 +888,14 @@ namespace constructor{
 	void level5(){
 	restart:	
 	
+		Music music;
+		music.openFromFile("Music/Halt_-This-Instant__v1__1.ogg");
+		music.setVolume(50.f);
+		music.setLoop(true);
+		music.play();
+		
+		scene_menu	SceneMenu;
+		
 		interrogation *main_bar = new interrogation();
 		(*main_bar).script.open("Scripts/Script5.txt");
 		
@@ -983,7 +925,7 @@ namespace constructor{
 		
 		RectangleShape background; // форма заднего фона
 		Texture texture;
-		texture.loadFromFile("Sprites/prison.jpg");
+		texture.loadFromFile("Sprites/prison.png");
 		
 		background_init(texture, background);
 		
@@ -999,25 +941,29 @@ namespace constructor{
 	        }
 	        
 	        mouse_position = Mouse::getPosition(window);
-		
-			background_movement(background);
-			
-			(*main_bar).update(false, character, 2);
-			
-			if ((*main_bar).act == 9) {
-				(*main_bar).isActive = false;
-				(*main_bar).DISAPPEARING = true;
-				if((*main_bar).alpha <= 1){
-					level5_start = false;
-					level5_5_start = true;
+			SceneMenu.update();
+					
+			if (!SceneMenu.isActive){
+				background_movement(background);
+				
+				(*main_bar).update(false, character, 2);
+				
+				if ((*main_bar).act == 9) {
+					(*main_bar).isActive = false;
+					(*main_bar).DISAPPEARING = true;
+					if((*main_bar).alpha <= 1){
+						level5_start = false;
+						level5_5_start = true;
+					}
 				}
+				if((*main_bar).lifes == 0) goto restart;
 			}
-			if((*main_bar).lifes == 0) goto restart;
 			
 			window.clear();
 	        window.setView(view);
 	        window.draw(background);
 	        (*main_bar).render();
+	        SceneMenu.render();
 	        window.display();
 	        
 	        
@@ -1030,6 +976,7 @@ namespace constructor{
 	void level5_5(){
 		
 		panel main_bar;
+		scene_menu SceneMenu;
 		
 		main_bar.script.open("Scripts/Script5_5.txt");
 		
@@ -1053,7 +1000,7 @@ namespace constructor{
 		
 		RectangleShape background; // форма заднего фона
 		Texture texture;
-		texture.loadFromFile("Sprites/prison.jpg");
+		texture.loadFromFile("Sprites/hallway.png");
 		
 		background_init(texture, background);
 		
@@ -1071,24 +1018,31 @@ namespace constructor{
 	                window.close();
 	        }
 	        
-	        background_movement(background);
+	        mouse_position = Mouse::getPosition(window);
+	        SceneMenu.update();
 	        
-	        main_bar.update(false, character, 2);
-	        if(main_bar.act == 1){
-	        	main_bar.isActive = false;
-	        	main_bar.DISAPPEARING = true;
-	        	main_bar.isDarkness = true;
-	        	main_bar.isDark = true;
-	        	if (main_bar.alpha < 3){
-	        		level5_5_start = false;
-	        		level6_start = true;
-	        	}
+	        if(!SceneMenu.isActive){
+		        
+				background_movement(background);
+		        
+		        main_bar.update(false, character, 2);
+		        if(main_bar.act == 1){
+		        	main_bar.isActive = false;
+		        	main_bar.DISAPPEARING = true;
+		        	main_bar.isDarkness = true;
+		        	main_bar.isDark = true;
+		        	if (main_bar.alpha < 3){
+		        		level5_5_start = false;
+		        		level6_start = true;
+		        	}
+				}
 			}
 	        
 	        window.clear();
 	        window.setView(view);
 	        window.draw(background);
 			main_bar.render();
+			SceneMenu.render();
 	        window.display();
 	        
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
@@ -1103,12 +1057,13 @@ namespace constructor{
 		
 		bool isDialogActive = false;
 		
+		scene_menu SceneMenu;
 		
 		level2_nmspc::main_player hero; // персонаж
 		panel bar; // диалоговое окно
 		level2_nmspc::npc emris; // нпс эмрис
 		level2_nmspc::npc anna; // нпс анна
-		inventory _inventory;
+		inventory _inventory; // инвентарь
 		
 		trigger anna_trig = trigger(anna.getSize().x * 1.5f, anna.getSize().x * 0.5f);
 		anna_trig.setOrigin(Vector2f(anna.getSize().x * 1.5f, anna.getSize().x * 0.25f));
@@ -1148,6 +1103,11 @@ namespace constructor{
 		
 		character[2].name = "анна";
 		character[2].setPosition(bar.current_right_positoin);
+		character[2].say_txt.loadFromFile("Sprites/Anna_Say.png");
+		character[2].say[0] = IntRect(10, 8, 144, 248);
+		character[2].say[1] = IntRect(154, 8, 144, 248);
+		character[2].idle_rect[0] = IntRect(10, 8, 144, 248);
+		character[2].idle_rect[1] = IntRect(442, 8, 144, 248);
 		
 		RectangleShape dark_back; //  форма для затемнения заднего фона во время диалогов
 		RectangleShape dark_front; // форма для затемнения экрана
@@ -1226,6 +1186,9 @@ namespace constructor{
 		emris.idle[2] = IntRect(260, 100, 43, 88);
 		emris.idle[3] = IntRect(260, 10, 43, 88);
 		
+		RectangleShape back;
+		back.setSize(Vector2f(WIDTH, HEIGHT));
+		
 		while (window.isOpen() && level6_start)
 	    {
 	        clock.restart();
@@ -1238,83 +1201,37 @@ namespace constructor{
 	        }
 	    	
 	    	mouse_position = Mouse::getPosition(window);
+	        SceneMenu.update();
+	        Texture back_txt;
+	        back_txt.loadFromFile("Sprites/flat.png");
+	        background_init(back_txt, back);
 	    	
-			if (timer_for_darkness.getElapsedTime().asSeconds() >= 4){
-		    	
-		    	if (dark_alpha > 0){
-		    		dark_alpha -= anim_speed * 5 * deltaTime;
-		    		if (dark_alpha <= 0) dark_alpha = 0;
-				}
-				dark_front.setFillColor(Color(0, 0, 0, (char)dark_alpha));
-			
-				if(bar.act == 0){
-		    		if (hero.getPosition().x < WIDTH / 3) {
-						hero.dir = RIGHT;
-						emris.dir = RIGHT;
+	    	if(!SceneMenu.isActive){
+				if (timer_for_darkness.getElapsedTime().asSeconds() >= 4){
+			    	
+			    	if (dark_alpha > 0){
+			    		dark_alpha -= anim_speed * 5 * deltaTime;
+			    		if (dark_alpha <= 0) dark_alpha = 0;
 					}
-		    		else{
-		    			emris.dir = STOP;
-		    			hero.dir = STOP;
-		    			hero.allowed = true;
-		    			bar.act = 1;
+					dark_front.setFillColor(Color(0, 0, 0, (char)dark_alpha));
+				
+					if(bar.act == 0){
+			    		if (hero.getPosition().x < WIDTH / 3) {
+							hero.dir = RIGHT;
+							emris.dir = RIGHT;
+						}
+			    		else{
+			    			emris.dir = STOP;
+			    			hero.dir = STOP;
+			    			hero.allowed = true;
+			    			bar.act = 1;
+						}
 					}
-				}
-				else if (bar.act == 1){
-					bar.allowed = true;
-					isDialogActive = true;
-				}
-				else if (bar.act == 2){
-					if (anna_trig.intersects(hero.collision_rect)){
+					else if (bar.act == 1){
 						bar.allowed = true;
-						if (bar.APPEARING || bar.isActive){
-							hero.allowed = false;
-							isDialogActive = true;
-						}
+						isDialogActive = true;
 					}
-					else{
-						bar.DISAPPEARING = true;
-						bar.allowed = false;
-						hero.allowed = true;
-						isDialogActive = false;
-					}
-				}
-				else if (bar.act == 3){
-					
-					if (anna.getPosition().x < WIDTH * 1.5f) anna.dir = RIGHT;
-					else anna.dir = STOP;
-					
-					if (note_trig.intersects(hero.collision_rect) && !get_note && get_map){
-						hint.setString("для взаимодействия нажмите клавишу E");
-						hint.setPosition(WIDTH / 2 - ((string)(hint.getString())).length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
-						if (Keyboard::isKeyPressed(Keyboard::E)){
-							get_note = true;
-						}
-					}
-					else if (map_trig.intersects(hero.collision_rect) && !get_map){
-						hint.setString("для взаимодействия нажмите клавишу E");
-						hint.setPosition(WIDTH / 2 - ((string)(hint.getString())).length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
-						if (Keyboard::isKeyPressed(Keyboard::E)){
-							get_map = true;
-						}
-					}
-					else{
-						hint.setString("");
-					}
-					
-					if (get_note && get_map) {
-						hint.setString("");
-						bar.act = 4;
-					}
-					
-					bar.DISAPPEARING = true;
-					bar.allowed = false;
-					hero.allowed = true;
-					isDialogActive = false;
-				}
-				else if (bar.act == 4){
-					if (anna.getPosition().x > WIDTH * 0.7f) anna.dir = LEFT;
-					else {
-						anna.dir = STOP;
+					else if (bar.act == 2){
 						if (anna_trig.intersects(hero.collision_rect)){
 							bar.allowed = true;
 							if (bar.APPEARING || bar.isActive){
@@ -1322,47 +1239,110 @@ namespace constructor{
 								isDialogActive = true;
 							}
 						}
+						else{
+							bar.DISAPPEARING = true;
+							bar.allowed = false;
+							hero.allowed = true;
+							isDialogActive = false;
+						}
+					}
+					else if (bar.act == 3){
+						
+						if (anna.getPosition().x < WIDTH * 1.5f) anna.dir = RIGHT;
+						else anna.dir = STOP;
+						
+						if (note_trig.intersects(hero.collision_rect) && !get_note && get_map){
+							hint.setString("для взаимодействия нажмите клавишу E");
+							hint.setPosition(WIDTH / 2 - ((string)(hint.getString())).length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+							if (Keyboard::isKeyPressed(Keyboard::E)){
+								get_note = true;
+							}
+						}
+						else if (map_trig.intersects(hero.collision_rect) && !get_map){
+							hint.setString("для взаимодействия нажмите клавишу E");
+							hint.setPosition(WIDTH / 2 - ((string)(hint.getString())).length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
+							if (Keyboard::isKeyPressed(Keyboard::E)){
+								get_map = true;
+							}
+						}
+						else{
+							hint.setString("");
+						}
+						
+						if (get_note && get_map) {
+							hint.setString("");
+							bar.act = 4;
+						}
+						
+						bar.DISAPPEARING = true;
+						bar.allowed = false;
+						hero.allowed = true;
+						isDialogActive = false;
+					}
+					else if (bar.act == 4){
+						if (anna.getPosition().x > WIDTH * 0.7f) anna.dir = LEFT;
+						else {
+							anna.dir = STOP;
+							if (anna_trig.intersects(hero.collision_rect)){
+								bar.allowed = true;
+								if (bar.APPEARING || bar.isActive){
+									hero.allowed = false;
+									isDialogActive = true;
+								}
+							}
+						}
+					}
+					else if(bar.act == 5){
+						bar.isDark = true;
+						bar.isDarkness = true;
+						bar.isActive = false;
+						bar.DISAPPEARING = true;
+						if (bar.alpha <= 1){
+							level6_start = false;
+							level7_start = true;
+						}
 					}
 				}
-			}
-			
-			if (get_map){
-				if (get_note) _inventory.trigger_notification("Добавлено: Загадочная записка", note, 0);
-				else _inventory.trigger_notification("Добавлено: Карта местности", _map, 1);
-			}
-			
-			
-			if(!isDialogActive){
-				hero.update();
-				emris.update(hero);
-				anna.update(hero);
 				
-				if (dark_back_alpha > 0 && bar.isActive) {
-					dark_back_alpha -= anim_speed * 10 * deltaTime;
-					if (dark_back_alpha <= 0) dark_back_alpha = 0;
-				}
-			}
-			else{
-				if (dark_back_alpha < 128) {
-					dark_back_alpha += anim_speed * 10 * deltaTime;
-					if (dark_back_alpha >= 128) dark_back_alpha = 128;
+				if (get_map){
+					if (get_note) _inventory.trigger_notification("Добавлено: Загадочная записка", note, 0);
+					else _inventory.trigger_notification("Добавлено: Карта местности", _map, 1);
 				}
 				
-				_inventory.isActive = false;
+				
+				if(!isDialogActive){
+					hero.update();
+					emris.update(hero);
+					anna.update(hero);
+					
+					if (dark_back_alpha > 0 && bar.isActive) {
+						dark_back_alpha -= anim_speed * 10 * deltaTime;
+						if (dark_back_alpha <= 0) dark_back_alpha = 0;
+					}
+				}
+				else{
+					if (dark_back_alpha < 128) {
+						dark_back_alpha += anim_speed * 10 * deltaTime;
+						if (dark_back_alpha >= 128) dark_back_alpha = 128;
+					}
+					
+					_inventory.isActive = false;
+				}
+				
+				dark_back.setFillColor(Color(0, 0, 0, (char)dark_back_alpha));
+				
+				_inventory.update();
+			    bar.update(false, character, 3);
+				
+				anna_trig.setPosition(anna.getPosition().x, anna.getPosition().y);
 			}
-			
-			dark_back.setFillColor(Color(0, 0, 0, (char)dark_back_alpha));
-			
-			_inventory.update();
-		    bar.update(false, character, 3);
-			
-			anna_trig.setPosition(anna.getPosition().x, anna.getPosition().y);
 			
 			RectangleShape shapes[] = {hero.shape, emris.shape, anna.shape};
 			double position[] = {hero.getPosition().y, emris.getPosition().y, anna.getPosition().y};
 			
 	    	window.clear();
 	        window.setView(view);
+	        window.draw(back);
 	        DrawSprites(shapes, position, 3);
 	        window.draw(hint);
 	        _inventory.render();
@@ -1378,6 +1358,121 @@ namespace constructor{
 	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
 		}
 		
+	}
+	
+	void level7(){
+	restart:	
+	
+		Music music;
+		music.openFromFile("Music/Halt_-This-Instant__v1__1.ogg");
+		music.setVolume(50.f);
+		music.setLoop(true);
+		music.play();
+		
+		scene_menu	SceneMenu;
+		
+		interrogation *main_bar = new interrogation();
+		(*main_bar).script.open("Scripts/Script7.txt");
+		
+		(*main_bar).nessesary_obj = 4;
+		(*main_bar).interrog_act = 5;
+		(*main_bar).true_act = 3;
+		
+		(*main_bar)._inventory.add_item_object(card);
+		
+		(*main_bar)._inventory.add_item_object(card);
+		(*main_bar)._inventory.add_item_object(_map);
+		(*main_bar)._inventory.add_record_object(note);
+		
+		person character[3];
+		
+		(*main_bar).rec = note;
+		
+		character[0].name = "виктор";
+		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
+		character[0].think_txt.loadFromFile("Sprites/victor_think.png");
+		character[0].sitting.loadFromFile("Sprites/atlas_sitting.png");
+		character[0].setPosition((*main_bar).current_left_positoin);
+		
+		character[1].name = "эмрис";
+		character[1].setPosition((*main_bar).current_right_positoin);
+		character[1].say_txt.loadFromFile("Sprites/Emris_say.png");
+		character[1].say[0] = IntRect(230, 0, 115, 256);
+		character[1].say[1] = IntRect(345, 0, 115, 256);
+		character[1].idle_rect[0] = IntRect(0, 0, 115, 256);
+		character[1].idle_rect[1] = IntRect(345, 0, 115, 256);	
+		
+		character[2].name = "анна";
+		character[2].setPosition((*main_bar).current_right_positoin);
+		character[2].say_txt.loadFromFile("Sprites/Anna_Say.png");
+		character[2].say[0] = IntRect(10, 8, 144, 248);
+		character[2].say[1] = IntRect(154, 8, 144, 248);
+		character[2].idle_rect[0] = IntRect(10, 8, 144, 248);
+		character[2].idle_rect[1] = IntRect(442, 8, 144, 248);
+		
+		(*main_bar).current_person = &character[0];
+		(*main_bar).withoutObject = true;
+		
+		RectangleShape background; // форма заднего фона
+		Texture texture;
+		texture.loadFromFile("Sprites/flat.png");
+		
+		RectangleShape black;
+		black.setSize(Vector2f(WIDTH, HEIGHT));
+		black.setFillColor(Color(0,0,0,0));
+		float alpha_black = 0.0f;
+		
+		
+		background_init(texture, background);
+		
+		while (window.isOpen() && level7_start)
+	    {
+	        clock.restart();
+	        
+			Event event;
+	        while (window.pollEvent(event))
+	        {
+	            if (event.type == sf::Event::Closed)
+	                window.close();
+	        }
+	        
+	        mouse_position = Mouse::getPosition(window);
+			SceneMenu.update();
+					
+			if (!SceneMenu.isActive){
+				background_movement(background);
+				
+				(*main_bar).update(false, character, 3);
+				
+				if ((*main_bar).act == 9) {
+					(*main_bar).isActive = false;
+					(*main_bar).DISAPPEARING = true;
+					if((*main_bar).alpha <= 1){
+						if (alpha_black > 0) {
+							alpha_black -= deltaTime * 15 * anim_speed;
+							if (alpha_black <= 0){
+								alpha_black = 0;
+//								level7_start = false;
+							}
+						}
+					}
+				}
+				if((*main_bar).lifes == 0) goto restart;				
+			}
+			
+			black.setFillColor(Color(0, 0, 0, (char)alpha_black));
+			
+			window.clear();
+	        window.setView(view);
+	        window.draw(background);
+	        (*main_bar).render();
+	        window.draw(black);
+	        SceneMenu.render();
+	        window.display();
+	        
+	        
+	        deltaTime = (double)clock.getElapsedTime().asMicroseconds() / 1000000;
+		}
 	}
 }
 

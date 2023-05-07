@@ -28,6 +28,7 @@ public:
 	bool isNesessaryObjFound; // найден ли необходимый объект
 	bool click; // для программного вызова новой реплики
 	bool appear_objection_button; // для появления кнопки
+	bool withoutObject; // без предмета
 	
 	float green_level; // уровень зеленого цвета
 	
@@ -38,6 +39,8 @@ public:
 	object rec;
 	
 	interrogation() : panel() {
+		
+		withoutObject = false;
 		
 		lifes = 5;
 		heart.setSize(Vector2f(WIDTH / 30, WIDTH / 30));
@@ -230,7 +233,7 @@ void interrogation::update(bool notInventary, person *character, int size){
 					
 				}
 				else {
-					if (!appear_objection_button) printing_delay = 0.01f;
+					printing_delay = 0.01f;
 				}
 			}
 			else if (!DISAPPEARING){
@@ -266,13 +269,12 @@ void interrogation::update(bool notInventary, person *character, int size){
 		if (appear_objection_button) (*objection).isActive = true;
 		else (*objection).isActive = false;
 		
-		_inventory.trigger_notification("Обновлено: Досье Слипанова", rec, 0);
+		if (!withoutObject) _inventory.trigger_notification("Обновлено: Досье Слипанова", rec, 0);
 		
 		if (_inventory.isActive){
 			if ((*_inventory.choose).onClick() && !isFound){
 				if(act == true_act && isObjectsEquals(_inventory.current, rec)){
 					while(script_text[0] != 'c'){
-						if (script_text != "") cout<<script_text[0]<<'\n';
 						getline(script, script_text);
 						more = false;
 						(*objection).isActive = false;
@@ -286,6 +288,9 @@ void interrogation::update(bool notInventary, person *character, int size){
 				else {
 					current_text = "";
 					script_text = "Не думаю, что это хороший выбор...";
+					current_person = &character[0];
+					(*current_person).isActive = true;
+					person_name.setString(character[0].name);
 					printing = true;
 					lifes--;
 					_inventory.isActive = false;
@@ -300,7 +305,7 @@ void interrogation::update(bool notInventary, person *character, int size){
 		else green_level = 0;
 		
 		if (act == interrog_act){
-			if (isNesessaryObjFound) isInterrogation = true;
+			if (isNesessaryObjFound || withoutObject) isInterrogation = true;
 			else{
 				script_text = "Не думаю, что я собрал достаточное количество информации для начала допроса. Мне стоит подробнее распросить подозреваемого...";
 				printing = true;

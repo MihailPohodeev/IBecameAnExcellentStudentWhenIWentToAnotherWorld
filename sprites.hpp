@@ -218,6 +218,11 @@ namespace level2_nmspc{
 		
 		main_player(){
 			
+			up_barrier = HEIGHT * 0.6f;
+			down_barrier = HEIGHT;
+			right_barrier = WIDTH * 0.72f;
+			left_barrier = WIDTH * 0.15f;
+			
 			name = "виктор";
 			standing = stand = false;
 			allowed = true;
