@@ -118,14 +118,24 @@ namespace level2_nmspc{
 	
 	
 	class npc : public character{
+	
+		Clock anim_timer;
+	
 	public:
 		
 		Texture texture;
 		
+		IntRect right_walking[6];
+		IntRect left_walking[6];
+		IntRect up_walking[6];
+		IntRect down_walking[6];
+		IntRect idle[4];
+		IntRect getting_up[4];
+		
 		bool near_by_player;
 		
 		void update(character &player);
-		void go_to_player(character &player);
+		void animation();
 		
 		npc(){
 			near_by_player = false;
@@ -146,28 +156,33 @@ namespace level2_nmspc{
 			near_by_player = false;
 			
 		_update();
+		animation();
 	}
 	
-	void npc::go_to_player(character &player){
-		static bool half = false;
-		static double full_x = x;
+	// анимация неигрового персонажа
+	void npc::animation(){
 		
-		if (!half){
-			if ( x <= full_x / 2){
-				half = true;
-			}
-			else {
-				if (player.getPosition().x > x) x += speed * deltaTime;
-				else x -= speed * deltaTime;
-			}
+		double anim_time = (double)anim_timer.getElapsedTime().asMicroseconds() / 1000000;
+		
+		if (anim_time > 1.f){
+			anim_timer.restart();
 		}
-		else {
-			if (player.getPosition().x > x) x += speed * deltaTime;
-			else x -= speed * deltaTime;
-			
-			if (player.getPosition().y > y) y += speed * deltaTime;
-			else y -= speed * deltaTime;
+		
+		if (dir == LEFT){
+			shape.setTextureRect(left_walking[(int)(anim_time * 6)]);
 		}
+		else if(dir == RIGHT){
+			shape.setTextureRect(right_walking[(int)(anim_time * 6)]);
+		}
+		else if (dir == UP){
+			shape.setTextureRect(up_walking[(int)(anim_time * 6)]);
+		}
+		else if (dir == DOWN){
+			shape.setTextureRect(down_walking[(int)(anim_time * 6)]);
+		}
+		else{
+			shape.setTextureRect(idle[last_dir - 1]);
+		}		
 	}
 	
 	

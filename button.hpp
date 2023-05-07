@@ -142,7 +142,7 @@ Vector2f Button::getSize(){
 
 // получить позицию кнопки
 Vector2f Button::getPosition(){
-	return shape.getPosition();
+	return position;
 }
 
 // анимация исчезновения
@@ -153,6 +153,8 @@ void Button::anim_disappearing(){
 		button_text.move(anim_speed * 2 * deltaTime, 0);
 	}
 	else {
+		shape.setPosition(2 * position.x - shape.getPosition().x, shape.getPosition().y);
+		button_text.setPosition(2 * position.x - button_text.getPosition().x, shape.getPosition().y);
 		anim_playing = false;
 	}
 	if (alpha < 0) alpha = 0;
@@ -160,19 +162,16 @@ void Button::anim_disappearing(){
 
 // анимация появления
 void Button::anim_appearing(){
-	static bool isFirst = true;
-	if (isFirst) {
-		shape.setPosition(2 * position.x - shape.getPosition().x, shape.getPosition().y);
-		button_text.setPosition(2 * position.x - button_text.getPosition().x, shape.getPosition().y);
-		isFirst = false;
-	}
+
 	if (alpha < 255) alpha += anim_speed * 50 * deltaTime;
 	if (position.x > shape.getPosition().x) {
 		shape.move(anim_speed * 2 * deltaTime, 0);
 		button_text.move(anim_speed * 2 * deltaTime, 0);
 	}
 	if (shape.getPosition().x >= position.x && alpha >= 255){
-		isFirst = true;
+		shape.setPosition(position);
+		button_text.setPosition(position);
+		alpha = 255;
 		anim_playing = false;
 	}
 	if (alpha > 255) alpha = 255;

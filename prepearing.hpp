@@ -5,6 +5,10 @@ namespace constructor{
 	Clock clock;
 	void background_movement(RectangleShape &back);
     
+    object card;// объект удостоверения личности
+    Texture objcts_txt; // текстура объектов
+	
+    
     // поочерёдная отрисовка спрайтов в зависимости от позиций
     void DrawSprites(RectangleShape *rect, double *pos, int count){
 
@@ -33,6 +37,11 @@ namespace constructor{
     
     // метод меню
     void menu(){
+    	
+    	objcts_txt.loadFromFile("Sprites/objects.png");
+    	card.description = "Удостоверение личности, кого-то похожего на вампира. В графе \"Имя\" написано \"Вит Калиновский\"";
+    	card.shape.setTexture(&objcts_txt);
+    	card.shape.setTextureRect(IntRect(1, 23, 18, 13));
     	
     	Music music; // музыка
     	music.openFromFile("Music/Friendly_Melody.ogg");
@@ -300,6 +309,14 @@ namespace constructor{
 		
 		character[3].name = "преподаватель";
 		character[3].setPosition(main_bar.current_right_positoin);
+		character[3].shape.setSize(Vector2f(WIDTH * 0.32f, HEIGHT * 0.6f));
+		character[3].setOrigin(Vector2f(character[3].shape.getSize().x / 2, character[3].shape.getSize().y));
+		character[3].say_txt.loadFromFile("Sprites/Prepod_say.png");
+		character[3].say[0] = IntRect(2, 40, 190, 215);
+		character[3].say[1] = IntRect(192, 40, 190, 215);
+		character[3].idle_rect[0] = IntRect(2, 40, 190, 215);
+		character[3].idle_rect[1] = IntRect(568, 40, 190, 215);
+		
 		
 		main_bar.current_person = &character[0];
 		
@@ -331,7 +348,7 @@ namespace constructor{
 	    
 	    music.setLoop(true);
 	    music.play();
-	    music.setVolume(10.f);
+	    music.setVolume(50.f);
 	    
 		while (window.isOpen() && level1_start)
 	    {
@@ -354,13 +371,16 @@ namespace constructor{
 			if ((main_bar.dark_alpha >= 254) && (main_bar.act > 0) && (!main_bar.isActive)){				
 				if (main_bar.act == 1) background_init(back_texture, background);
 				else if (main_bar.act == 2) {
+					character[3].shape.setSize(Vector2f(WIDTH * 0.4f, HEIGHT * 0.8f));
+					character[3].setOrigin(Vector2f(character[3].shape.getSize().x, character[3].shape.getSize().y));
+					character[3].shape.setPosition(main_bar.panel_shape.getPosition().x + main_bar.panel_shape.getSize().x, character[3].shape.getPosition().y);
 					background_init(classroom_texture, background);
 					for (int i = 0; i < 3; i++) character[i].isSitting = true;
 				}
 				main_bar.isDark = false;
 			}
 			
-			if (main_bar.act == 3){							
+			if (main_bar.act == 3) {					
 				
 				character[0].shape.setTextureRect(finalRect);
 			
@@ -442,7 +462,7 @@ namespace constructor{
 		
 		Music music;
 		music.openFromFile("Music/I-Am-Okay-With-What-I-Am-Doing.ogg");
-		music.setVolume(10.f);
+		music.setVolume(50.f);
 		music.setLoop(true);
 		music.play();
 		
@@ -480,7 +500,7 @@ namespace constructor{
 		inventory _inventory; // инвентарь
 		scene_menu sceneMenu; // меню
 		
-		emris.setPosition(Vector2f(WIDTH / 2, HEIGHT * 3 / 4));
+		emris.setPosition(Vector2f(WIDTH * 1.2f, HEIGHT));
 		
 		hero.movement = false;
 		bool cutscene = false;
@@ -499,11 +519,43 @@ namespace constructor{
 		background_image.loadFromFile("Sprites/background2.jpg");
 		window_view_image.loadFromFile("Sprites/window_view.png");
 		
-		background_init(background_image, background);
+		background_init(background_image, background);	
 		
-		object card;// объект удостоверения личности
-		card.description = "Удостоверение личности, кого-то похожего на вампира. В графе \"Имя\" написано \"Вит Калиновский\"";
-		
+		emris.texture.loadFromFile("Sprites/emris_atlas.png");
+		emris.shape.setTexture(&emris.texture);
+			
+		emris.left_walking[0] = IntRect(0, 10, 43, 88);
+		emris.left_walking[1] = IntRect(45, 10, 43, 88);
+		emris.left_walking[2] = IntRect(90, 10, 43, 88);
+		emris.left_walking[3] = IntRect(135, 10, 43, 88);
+		emris.left_walking[4] = IntRect(180, 10, 43, 88);
+		emris.left_walking[5] = IntRect(215, 10, 43, 88);
+			
+		emris.right_walking[0] = IntRect(0, 100, 43, 88);
+		emris.right_walking[1] = IntRect(45, 100, 43, 88);
+		emris.right_walking[2] = IntRect(90, 100, 43, 88);
+		emris.right_walking[3] = IntRect(135, 100, 43, 88);
+		emris.right_walking[4] = IntRect(180, 100, 43, 88);;
+		emris.right_walking[5] = IntRect(215, 100, 43, 88);
+			
+		emris.up_walking[0] = IntRect(0, 200, 43, 88);
+		emris.up_walking[1] = IntRect(44, 200, 43, 88);
+		emris.up_walking[2] = IntRect(88, 200, 43, 88);
+		emris.up_walking[3] = IntRect(132, 200, 43, 88);
+		emris.up_walking[4] = IntRect(176, 200, 43, 88);;
+		emris.up_walking[5] = IntRect(215, 200, 43, 88);
+			
+		emris.down_walking[0] = IntRect(0, 290, 43, 88);
+		emris.down_walking[1] = IntRect(44, 290, 43, 88);
+		emris.down_walking[2] = IntRect(88, 290, 43, 88);
+		emris.down_walking[3] = IntRect(132, 290, 43, 88);
+		emris.down_walking[4] = IntRect(176, 290, 43, 88);;
+		emris.down_walking[5] = IntRect(215, 290, 43, 88);
+			
+		emris.idle[0] = IntRect(260, 200, 43, 88);
+		emris.idle[1] = IntRect(260, 290, 43, 88);
+		emris.idle[2] = IntRect(260, 100, 43, 88);
+		emris.idle[3] = IntRect(260, 10, 43, 88);	
 		
 		while (window.isOpen() && level2_start)
 	    {
@@ -598,6 +650,9 @@ namespace constructor{
 			
 			// акт 3
 			else if (bar.script_act == 3){
+				
+				_inventory.trigger_notification("Добавлено: Удостоверение личности", card, 1);
+				
 				if (!cutscene && alpha < 255) {
 					alpha += anim_speed * 25 * deltaTime;
 					bar.isActive = false;
@@ -634,9 +689,19 @@ namespace constructor{
 					alpha -= anim_speed *  25 * deltaTime;
 					if (alpha <= 0){
 						alpha = 0;
-						bar.isActive = true;
 					}
 				}
+				
+				if (emris.getPosition().x > (hero.getPosition().x + (WIDTH - hero.getPosition().x) / 2)) emris.dir = LEFT;
+				else if (emris.getPosition().y > hero.getPosition().y) emris.dir = UP;
+				else if (emris.getPosition().x > hero.getPosition().x + hero.getSize().x * .75f) emris.dir = LEFT;
+				else {
+					bar.isActive = true;
+					emris.dir = STOP;
+					hero.last_dir = RIGHT;
+					emris.last_dir = LEFT;
+				}
+				emris.update(hero);
 			}
 			
 			// акт 5
@@ -675,7 +740,7 @@ namespace constructor{
 	        window.draw(background);
 	        if(!cutscene) {
 				hero.render();
-//				emris.render();
+				emris.render();
 			}
 	        window.draw(hint);
 	        bar.render();
@@ -811,7 +876,10 @@ namespace constructor{
 	        
 	        main_bar.update(false, character, 3);
 	        
-			if (main_bar.act == 3){
+	        if (main_bar.act == 2 && (*main_bar.current_person).name != character[1].name){
+	        	character[1].setPosition(Vector2f((main_bar.current_left_positoin.x + main_bar.current_right_positoin.x) / 2, main_bar.current_left_positoin.y));
+			}
+			else if (main_bar.act == 3){
 				main_bar.isActive = false;
 				main_bar.DISAPPEARING = main_bar.isDark = true;
 				if (main_bar.alpha < 2){
@@ -893,7 +961,14 @@ namespace constructor{
 		(*main_bar).interrog_act = 5;
 		(*main_bar).true_act = 1;
 		
+		(*main_bar)._inventory.add_item_object(card);
+		
 		person character[2];
+		object rec;
+		rec.shape.setTexture(&objcts_txt);
+    	rec.shape.setTextureRect(IntRect(13, 2, 19, 17));
+    	rec.description = "\"Зендей Слипанов, раса: Великан\" ...знал жертву заочно по рассказам друзей...";
+		(*main_bar).rec = rec;
 		
 		character[0].name = "виктор";
 		character[0].say_txt.loadFromFile("Sprites/victor_say.png");
@@ -937,8 +1012,6 @@ namespace constructor{
 					level5_5_start = true;
 				}
 			}
-			
-			cout<<(*main_bar).lifes<<'\n';
 			if((*main_bar).lifes == 0) goto restart;
 			
 			window.clear();
@@ -1022,6 +1095,9 @@ namespace constructor{
 		}
 	}
 	
+	object _map;
+	object note;
+	
 	// уровень в квартире
 	void level6(){
 		
@@ -1034,7 +1110,8 @@ namespace constructor{
 		level2_nmspc::npc anna; // нпс анна
 		inventory _inventory;
 		
-		trigger anna_trig = trigger(anna.getSize().x * 2, anna.getSize().x * 0.25f);
+		trigger anna_trig = trigger(anna.getSize().x * 1.5f, anna.getSize().x * 0.5f);
+		anna_trig.setOrigin(Vector2f(anna.getSize().x * 1.5f, anna.getSize().x * 0.25f));
 		trigger note_trig = trigger(WIDTH * 0.1f, HEIGHT* 0.1f);
 		trigger map_trig = trigger(WIDTH * 0.1f, HEIGHT* 0.1f);
 		
@@ -1045,11 +1122,13 @@ namespace constructor{
 		bar.allowed = false;
 		bar.script.open("Scripts/Script6.txt");
 		
-		object _map;
-		object note;
-		
-		_map.description = "Карта с несколькими обозначенными местами. Точно известно, что все эти места заброшены.";
+		_map.shape.setTexture(&objcts_txt);
+    	_map.shape.setTextureRect(IntRect(0, 39, 32, 25));
+    	_map.description = "Карта с несколькими обозначенными местами. Точно известно, что все эти места заброшены.";
+    	note.shape.setTexture(&objcts_txt);
+    	note.shape.setTextureRect(IntRect(13, 2, 19, 17));
 		note.description = "Записка : \"Ушел к своему обычному месту. Не скучай и не волнуйся. Лен.\"";
+
 		
 		person character[3];
 		
@@ -1111,6 +1190,42 @@ namespace constructor{
 		
 		bool get_map = false, get_note = false;
 		
+		emris.texture.loadFromFile("Sprites/emris_atlas.png");
+		emris.shape.setTexture(&emris.texture);
+			
+		emris.left_walking[0] = IntRect(0, 10, 43, 88);
+		emris.left_walking[1] = IntRect(45, 10, 43, 88);
+		emris.left_walking[2] = IntRect(90, 10, 43, 88);
+		emris.left_walking[3] = IntRect(135, 10, 43, 88);
+		emris.left_walking[4] = IntRect(180, 10, 43, 88);
+		emris.left_walking[5] = IntRect(215, 10, 43, 88);
+			
+		emris.right_walking[0] = IntRect(0, 100, 43, 88);
+		emris.right_walking[1] = IntRect(45, 100, 43, 88);
+		emris.right_walking[2] = IntRect(90, 100, 43, 88);
+		emris.right_walking[3] = IntRect(135, 100, 43, 88);
+		emris.right_walking[4] = IntRect(180, 100, 43, 88);;
+		emris.right_walking[5] = IntRect(215, 100, 43, 88);
+			
+		emris.up_walking[0] = IntRect(0, 200, 43, 88);
+		emris.up_walking[1] = IntRect(44, 200, 43, 88);
+		emris.up_walking[2] = IntRect(88, 200, 43, 88);
+		emris.up_walking[3] = IntRect(132, 200, 43, 88);
+		emris.up_walking[4] = IntRect(176, 200, 43, 88);;
+		emris.up_walking[5] = IntRect(215, 200, 43, 88);
+			
+		emris.down_walking[0] = IntRect(0, 290, 43, 88);
+		emris.down_walking[1] = IntRect(44, 290, 43, 88);
+		emris.down_walking[2] = IntRect(88, 290, 43, 88);
+		emris.down_walking[3] = IntRect(132, 290, 43, 88);
+		emris.down_walking[4] = IntRect(176, 290, 43, 88);;
+		emris.down_walking[5] = IntRect(215, 290, 43, 88);
+			
+		emris.idle[0] = IntRect(260, 200, 43, 88);
+		emris.idle[1] = IntRect(260, 290, 43, 88);
+		emris.idle[2] = IntRect(260, 100, 43, 88);
+		emris.idle[3] = IntRect(260, 10, 43, 88);
+		
 		while (window.isOpen() && level6_start)
 	    {
 	        clock.restart();
@@ -1165,7 +1280,7 @@ namespace constructor{
 				}
 				else if (bar.act == 3){
 					
-					if (anna.getPosition().x < WIDTH) anna.dir = RIGHT;
+					if (anna.getPosition().x < WIDTH * 1.5f) anna.dir = RIGHT;
 					else anna.dir = STOP;
 					
 					if (note_trig.intersects(hero.collision_rect) && !get_note && get_map){

@@ -87,7 +87,7 @@ namespace level2_nmspc{
 			text_appearence.setBuffer(buffer);
 			text_appearence.setVolume(5.f);
 			
-			script.open("Scripts/Script2.txt");
+			script.open("Scripts/Script2.dat");
 			if(!script) cout<<"Error!!! File not open."<<'\n';
 			else cout<<"File opened succsessfully."<<'\n';
 		}	

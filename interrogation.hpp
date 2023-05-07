@@ -8,6 +8,7 @@ class interrogation : public panel{
 	}
 	
 	RectangleShape heart; // форма сердечка
+	Texture heart_txt;
 	
 public:
 
@@ -38,12 +39,12 @@ public:
 	
 	interrogation() : panel() {
 		
-		heart.setSize(Vector2f(WIDTH / 20, WIDTH / 20));
-		heart.setPosition(0,0);
-		
 		lifes = 5;
-		
-		rec.description = "\"Зендей Слипанов, раса: Великан\" ...знал жертву заочно по рассказам друзей...";
+		heart.setSize(Vector2f(WIDTH / 30, WIDTH / 30));
+		heart.setPosition(0,0);
+		heart_txt.loadFromFile("Sprites/objects.png");
+		heart.setTexture(&heart_txt);
+		heart.setTextureRect(IntRect(2, 3, 11, 10));
 		
 		isActive = click = appear_objection_button = false;
 		
@@ -141,7 +142,7 @@ void interrogation::update(bool notInventary, person *character, int size){
 						}
 						else if (!more){
 							
-							if (act != interrog_act) {
+							if (act != interrog_act - 1) {
 								(*more_details).isActive = true;
 								(*objection).isActive = true;
 							}

@@ -24,7 +24,7 @@ double thick_size = (WIDTH + HEIGHT)/ 300; // размер контура
 
 int current_act = 0; // номер акта
 
-bool debugging = false;
+bool debugging = true;
 
 bool level1_start = true; // начата ли игра
 bool level2_start = true; // начата ли игра 2

@@ -62,8 +62,8 @@ void slot::update(){
 	}
 	else{
 		if (alpha > 0) {
-			alpha -= 510 * deltaTime;
-			if (alpha < 0) alpha = 0;
+			alpha -= 500 * deltaTime;
+			if (alpha <= 0) alpha = 0;
 		} else alpha = 0;	
 	}
 	

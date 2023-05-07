@@ -217,8 +217,6 @@ void panel::update(bool notInventary, person *character, int size){
 	if(alpha > 2) help = false;
 	else help = true;
 	
-	cout<<dark_alpha<<'\n';
-	
 	if (((double)anim_clock.getElapsedTime().asMicroseconds() / 1000000) > 1) {
 		mouse_icon.setTextureRect(mouse_sprites[1]);
 		arrows.setTextureRect(arrows_sprites[0]);
