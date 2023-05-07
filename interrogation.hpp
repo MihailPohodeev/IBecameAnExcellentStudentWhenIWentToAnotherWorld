@@ -2,8 +2,16 @@
 
 class interrogation : public panel{
 	
-public:
+	bool isObjectsEquals(object obj1, object obj2){
+		if (obj1.description == obj2.description) return true;
+		return false;
+	}
 	
+	RectangleShape heart; // форма сердечка
+	
+public:
+
+	int lifes; // количество очков терпения
 	
 	void update(bool notInventary, person *character, int size); // обновление
 	void render(); // отрисовка интерфейса
@@ -14,18 +22,32 @@ public:
 	bool more; // больше информации
 	bool isInterrogation; // режим допроса
 	bool isCorrect; // верно ли выбрана позиция возражения
+	bool isFound; // найдено ли противоречие
+	bool dialog; // диалог без допроса
+	bool isNesessaryObjFound; // найден ли необходимый объект
+	bool click; // для программного вызова новой реплики
+	bool appear_objection_button; // для появления кнопки
 	
 	float green_level; // уровень зеленого цвета
 	
 	inventory _inventory;
 	
-	int interrog_act, true_act;
+	int interrog_act, true_act, nessesary_obj;
+	
+	object rec;
 	
 	interrogation() : panel() {
 		
-		isActive = false;
+		heart.setSize(Vector2f(WIDTH / 20, WIDTH / 20));
+		heart.setPosition(0,0);
 		
-		more = false;
+		lifes = 5;
+		
+		rec.description = "\"Зендей Слипанов, раса: Великан\" ...знал жертву заочно по рассказам друзей...";
+		
+		isActive = click = appear_objection_button = false;
+		
+		more = isFound = dialog = isNesessaryObjFound = false;
 		isInterrogation = false;
 		
 		_inventory.isInterrogation = true;
@@ -60,7 +82,11 @@ public:
 // обновление
 void interrogation::update(bool notInventary, person *character, int size){
 	
-	if ((Mouse::isButtonPressed(Mouse::Left) || Joystick::isButtonPressed(0, 1)) && !notInventary){
+	if ((Mouse::isButtonPressed(Mouse::Left) || Joystick::isButtonPressed(0, 1) || click) && !notInventary){
+		
+		click = false;
+		bool isNewAct = false; // доступен ли новый акт
+		
 		if (left_click){
 			if(isActive && !DISAPPEARING){
 				if (!printing){
@@ -69,6 +95,7 @@ void interrogation::update(bool notInventary, person *character, int size){
 						(*more_details).isActive = false;
 						(*objection).isActive = false;
 						more = true;
+						if (act == nessesary_obj) isNesessaryObjFound = true;
 					}
 					
 					if ((*objection).onClick()){
@@ -82,16 +109,53 @@ void interrogation::update(bool notInventary, person *character, int size){
 						thinking = false;
 						bool name = false;
 						string speech = "";
-						if (!more){
+						
+						if (dialog){
+							for (int i = 0; i < script_text.length(); i++){
+								if (script_text[i] == '['){
+									isAct = true;
+									continue;
+								}
+								else if (script_text[i] == ']'){
+									isAct = false;
+									act = stoi(act_str);
+									continue;
+								}
+								else if (script_text[i] == '<') {
+									name = true;
+									continue;
+								} 
+								else if (script_text[i] == '>') {
+									name = false;
+									continue;
+								}
+								
+								if (script_text[i] == '@') thinking = true;
+								
+								if (isAct) act_str += script_text[i];
+								else if (name) name_text += script_text[i];
+								else if ((name == false) && (script_text[i] != '@') && (script_text[i] != '%')) speech += script_text[i];
+							}
+							script_text = speech;
+							printing = true;
+						}
+						else if (!more){
 							
-							(*more_details).isActive = true;
-							(*objection).isActive = true;
+							if (act != interrog_act) {
+								(*more_details).isActive = true;
+								(*objection).isActive = true;
+							}
+							else{
+								(*more_details).isActive = false;
+								(*objection).isActive = false;
+							}
 							while(script_text[0] != '[')
 								getline(script, script_text);
 								
 							for (int i = 0; i < script_text.length(); i++){
 								if (script_text[i] == '['){
 									isAct = true;
+									isNewAct = true;
 									continue;
 								}
 								else if (script_text[i] == ']'){
@@ -159,9 +223,13 @@ void interrogation::update(bool notInventary, person *character, int size){
 							}
 						}	
 					}
+					
+					if(isInterrogation && isNewAct && !more && !isFound) appear_objection_button = true;
+					else appear_objection_button = false;
+					
 				}
 				else {
-					printing_delay = 0.01f;
+					if (!appear_objection_button) printing_delay = 0.01f;
 				}
 			}
 			else if (!DISAPPEARING){
@@ -177,21 +245,50 @@ void interrogation::update(bool notInventary, person *character, int size){
 		left_click = true;
 	}
 	
-	if (isInterrogation){		
-		if(!more) (*objection).isActive = true;
+	if (isInterrogation){	
 		
 		if (green_level < 128) green_level += anim_speed * 5 * deltaTime;
 		else green_level = 128;
 		
 		if (act == interrog_act) {
+			(*objection).isActive = false;
+			(*more_details).isActive = false;
+			current_text = "";
+			script_text = "Не могли бы вы еще раз повторить ваш рассказ?";
+			printing = true;
 			script.clear();
 			script.seekg(0);
+			act = 0;
+			appear_objection_button = false;
 		}
 		
+		if (appear_objection_button) (*objection).isActive = true;
+		else (*objection).isActive = false;
+		
+		_inventory.trigger_notification("Обновлено: Досье Слипанова", rec, 0);
+		
 		if (_inventory.isActive){
-			if ((*_inventory.choose).onClick()){
-				if(act == true_act) cout<<"Da!"<<'\n';
-				else cout<<"No!"<<'\n';
+			if ((*_inventory.choose).onClick() && !isFound){
+				if(act == true_act && isObjectsEquals(_inventory.current, rec)){
+					while(script_text[0] != 'c'){
+						if (script_text != "") cout<<script_text[0]<<'\n';
+						getline(script, script_text);
+						more = false;
+						(*objection).isActive = false;
+						(*more_details).isActive = false;
+					}
+					isFound = dialog = true;
+					getline(script, script_text);
+					_inventory.isActive = false;
+					click = true;
+				}
+				else {
+					current_text = "";
+					script_text = "Не думаю, что это хороший выбор...";
+					printing = true;
+					lifes--;
+					_inventory.isActive = false;
+				}
 			}
 		}
 	}
@@ -201,10 +298,15 @@ void interrogation::update(bool notInventary, person *character, int size){
 		if (green_level > 0) green_level -= anim_speed * 5 * deltaTime;
 		else green_level = 0;
 		
-		if (act == interrog_act) {
-			isInterrogation = true;
+		if (act == interrog_act){
+			if (isNesessaryObjFound) isInterrogation = true;
+			else{
+				script_text = "Не думаю, что я собрал достаточное количество информации для начала допроса. Мне стоит подробнее распросить подозреваемого...";
+				printing = true;
+			}
 			script.clear();
 			script.seekg(0);
+			act = 0;
 		}
 	}
 	
@@ -261,5 +363,10 @@ void interrogation::render(){
 	if (help) window.draw(mouse_icon);
 	(*objection).update();
 	(*more_details).update();
+	for (int i = 0; i < lifes; i++){
+		window.draw(heart);
+		heart.move(heart.getSize().x, 0);
+	}
+	heart.setPosition(0, 0);
 	_inventory.render();
 }

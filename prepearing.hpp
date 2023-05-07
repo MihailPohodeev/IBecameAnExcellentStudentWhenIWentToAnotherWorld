@@ -5,6 +5,32 @@ namespace constructor{
 	Clock clock;
 	void background_movement(RectangleShape &back);
     
+    // поочерёдная отрисовка спрайтов в зависимости от позиций
+    void DrawSprites(RectangleShape *rect, double *pos, int count){
+
+		int length = count;
+		while(length--)
+		{
+			bool swapped = false;
+			
+			for(int i = 0; i < length; i++)
+			{
+				if(pos[i] > pos[i + 1])
+				{
+					swap(pos[i], pos[i + 1]);
+					swap(rect[i], rect[i + 1]);
+					swapped = true;
+				}
+			}
+			
+			if(swapped == false)
+				break;
+		}
+		for (int i = 0 ; i < count; i++){
+			window.draw(rect[i]);
+		}
+	}
+    
     // метод меню
     void menu(){
     	
@@ -275,7 +301,9 @@ namespace constructor{
 		character[3].name = "преподаватель";
 		character[3].setPosition(main_bar.current_right_positoin);
 		
-		(main_bar.current_person) = &character[0];
+		main_bar.current_person = &character[0];
+		
+		IntRect finalRect = IntRect(6, 672, 225, 190);
 		
 		main_bar.isDark = false;
 		main_bar.dark_alpha = 0;		
@@ -299,7 +327,7 @@ namespace constructor{
 	    
 	    // масштабирование заднего фона
 	    background_init(black, background);
-//	    window.setFramerateLimit(60);
+	    window.setFramerateLimit(60);
 	    
 	    music.setLoop(true);
 	    music.play();
@@ -333,6 +361,9 @@ namespace constructor{
 			}
 			
 			if (main_bar.act == 3){							
+				
+				character[0].shape.setTextureRect(finalRect);
+			
 				if (alpha < 253.f){
 					volume -= anim_speed * 2 * deltaTime;
 					alpha += anim_speed * 5 * deltaTime;
@@ -853,10 +884,12 @@ namespace constructor{
 	// уровень 5
 	// допрос подозреваемого
 	void level5(){
-		
+	restart:	
+	
 		interrogation *main_bar = new interrogation();
 		(*main_bar).script.open("Scripts/Script5.txt");
 		
+		(*main_bar).nessesary_obj = 4;
 		(*main_bar).interrog_act = 5;
 		(*main_bar).true_act = 1;
 		
@@ -899,7 +932,14 @@ namespace constructor{
 			if ((*main_bar).act == 9) {
 				(*main_bar).isActive = false;
 				(*main_bar).DISAPPEARING = true;
+				if((*main_bar).alpha <= 1){
+					level5_start = false;
+					level5_5_start = true;
+				}
 			}
+			
+			cout<<(*main_bar).lifes<<'\n';
+			if((*main_bar).lifes == 0) goto restart;
 			
 			window.clear();
 	        window.setView(view);
@@ -1025,7 +1065,7 @@ namespace constructor{
 		character[1].say[0] = IntRect(230, 0, 115, 256);
 		character[1].say[1] = IntRect(345, 0, 115, 256);
 		character[1].idle_rect[0] = IntRect(0, 0, 115, 256);
-		character[1].idle_rect[1] = IntRect(345, 0, 115, 256);
+		character[1].idle_rect[1] = IntRect(345, 0, 115, 256);		
 		
 		character[2].name = "анна";
 		character[2].setPosition(bar.current_right_positoin);
@@ -1203,11 +1243,12 @@ namespace constructor{
 			
 			anna_trig.setPosition(anna.getPosition().x, anna.getPosition().y);
 			
+			RectangleShape shapes[] = {hero.shape, emris.shape, anna.shape};
+			double position[] = {hero.getPosition().y, emris.getPosition().y, anna.getPosition().y};
+			
 	    	window.clear();
 	        window.setView(view);
-	        hero.render();
-	        emris.render();
-	        anna.render();
+	        DrawSprites(shapes, position, 3);
 	        window.draw(hint);
 	        _inventory.render();
 	        window.draw(dark_back);

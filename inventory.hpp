@@ -35,6 +35,8 @@ class inventory{
 	
 public:
 	
+	object current; // текущий объект
+	
 	Button *choose; // выбор файла
 	
 	void add_item_object(object &obj); // добавление объекта в инвентарь
@@ -125,6 +127,11 @@ void inventory::update(){
 			isActive = !isActive;
 			clock.restart();
 			onPress = true;
+			if (isInterrogation && start) {
+				(*choose).isActive = true;
+				max_line_len = WIDTH / 25;
+			} else max_line_len = WIDTH / 16;
+			start = false;
 		}
 	} else onPress = false;
 	
@@ -135,7 +142,6 @@ void inventory::update(){
 		else{
 			alpha = max_darkness;
 			(*change_category).isActive = true;
-			if (isInterrogation) (*choose).isActive = true;
 			for (char i = 0; i < 8; i++) slots[i].isActive = true;
 		}
 		
@@ -169,6 +175,12 @@ void inventory::update(){
 		if (slots[i].onClick()){
 			if (!isClickSlot[i]){
 				description.setString(cut_text((current_category == RECORDS) ? records[i].description : items[i].description));
+				if (current_category == RECORDS){
+					current = records[i];
+				}
+				else{
+					current = items[i];
+				}
 			}
 			isClickSlot[i] = true;
 		}

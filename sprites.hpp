@@ -7,7 +7,6 @@ namespace level2_nmspc{
 	protected:
 		
 		// форма персонажа
-		RectangleShape shape;
 		RectangleShape collider;
 		
 		// имя персонажа
@@ -20,6 +19,8 @@ namespace level2_nmspc{
 		
 		
 	public:
+		
+		RectangleShape shape;
 		
 		// направление движения
 		direction dir;
