@@ -13,14 +13,14 @@ namespace level2_nmspc{
 		string name;
 		
 		double x, y; // координаты персонажа
-		double speed; // скорость движения персонажа
-		
-		int up_barrier, down_barrier, right_barrier, left_barrier;
-		
+		double speed; // скорость движения персонажа		
 		
 	public:
 		
 		RectangleShape shape;
+		RectangleShape shadow;
+		
+		int up_barrier, down_barrier, right_barrier, left_barrier;
 		
 		// направление движения
 		direction dir;
@@ -38,8 +38,12 @@ namespace level2_nmspc{
 		void render(); // отрисовка
 		
 		character(){
-			shape.setSize(Vector2f(WIDTH / 8, HEIGHT / 3));
+			shape.setSize(Vector2f(WIDTH / 6, HEIGHT / 2));
 			shape.setOrigin(Vector2f(shape.getSize().x / 2, shape.getSize().y));
+			
+			shadow.setFillColor(Color(0, 0, 0, 64));
+			shadow.setSize(Vector2f(shape.getSize().x * 0.7f, shape.getSize().y / 6));
+			shadow.setOrigin(Vector2f(shadow.getSize().x * 0.35f, shadow.getSize().y * 0.8f));
 			
 			collider.setSize(Vector2f(shape.getSize().x, shape.getSize().y / 10));
 			collider.setOrigin(Vector2f(collider.getSize().x / 2, collider.getSize().y));
@@ -91,11 +95,13 @@ namespace level2_nmspc{
 		collision_rect = collider.getGlobalBounds();
 		
 		shape.setPosition(x, y);
+		shadow.setPosition(x, y);
 		collider.setPosition(x, y);
 	}
 	
 	// отрисовка
 	void character::render(){
+		window.draw(shadow);
 		window.draw(shape);
 		if (debugging) window.draw(collider);
 	}
@@ -140,7 +146,7 @@ namespace level2_nmspc{
 		npc(){
 			near_by_player = false;
 			
-			shape.setSize(Vector2f(WIDTH / 8, HEIGHT / 3));
+			shape.setSize(Vector2f(WIDTH / 6, HEIGHT / 2));
 			shape.setOrigin(Vector2f(shape.getSize().x / 2, shape.getSize().y));
 			
 		}
@@ -166,6 +172,7 @@ namespace level2_nmspc{
 		
 		if (anim_time > 1.f){
 			anim_timer.restart();
+			anim_time = (double)anim_timer.getElapsedTime().asMicroseconds() / 1000000;
 		}
 		
 		if (dir == LEFT){
@@ -267,7 +274,7 @@ namespace level2_nmspc{
 			getting_up[1] = IntRect(140, 390, 90, 90);
 			getting_up[2] = IntRect(220, 390, 90, 90);
 			
-			shape.setSize(Vector2f(WIDTH / 5, WIDTH / 5));
+			shape.setSize(Vector2f(WIDTH / 4, WIDTH / 4));
 			shape.setOrigin(Vector2f(shape.getSize().x / 2, shape.getSize().y * 0.8f));
 			shape.setTextureRect(getting_up[0]);
 		}
@@ -308,13 +315,14 @@ namespace level2_nmspc{
 		
 		if (anim_time > 1.f){
 			anim_timer.restart();
+			anim_time = (double)anim_timer.getElapsedTime().asMicroseconds() / 1000000;
 		}
 		
 		if (!standing && stand){
 			shape.setTextureRect(getting_up[(int)(anim_time * 3)]);
-			if (anim_time > 0.9) {
+			if (anim_time > 0.9f) {
 				standing = true;
-				shape.setSize(Vector2f(WIDTH / 8, HEIGHT / 3));
+				shape.setSize(Vector2f(WIDTH / 6, HEIGHT / 2));
 				shape.setOrigin(Vector2f(shape.getSize().x / 2, shape.getSize().y));
 				
 				collider.setSize(Vector2f(shape.getSize().x / 2, shape.getSize().y / 10));

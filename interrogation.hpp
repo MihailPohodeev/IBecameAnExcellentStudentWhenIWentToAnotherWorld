@@ -323,12 +323,9 @@ void interrogation::update(bool notInventary, person *character, int size){
 	}
 	if (APPEARING) anim_appearing();
 	
-	if (printing) {
-		anim_text();
+	if (printing)
 		if (!thinking) 
 			speaking = true;
-	}
-	else speaking = false;
 	
 	// действия персонажей
 	if (thinking) (*current_person).isThinking = true;
@@ -336,7 +333,24 @@ void interrogation::update(bool notInventary, person *character, int size){
 	
 	if (speaking) (*current_person).isSpeaking = true;
 	else (*current_person).isSpeaking = false;
+	
+	cout<<(*current_person).isSpeaking<<'\n';
+	
 	(*current_person).update();
+	
+	if (printing) {
+		anim_text();
+	}
+	else speaking = false;
+	
+	if (((double)anim_clock.getElapsedTime().asMicroseconds() / 1000000) > 1) {
+		mouse_icon.setTextureRect(mouse_sprites[1]);
+		arrows.setTextureRect(arrows_sprites[0]);
+	}
+	else {
+		mouse_icon.setTextureRect(mouse_sprites[0]);
+		arrows.setTextureRect(arrows_sprites[1]);
+	}
 	
 	_inventory.update();
 	

@@ -264,7 +264,7 @@ void inventory::trigger_notification(string str, object &obj, bool isItem){
 }
 
 void inventory::add_item_object(object &obj){
-	obj.shape.setPosition(slots[records_count].getPosition());
+	obj.shape.setPosition(slots[items_count].getPosition());
 	items[items_count] = obj;
 	items_count++;
 }
