@@ -180,7 +180,6 @@ void person::sitting_writing(){
 	if ((double)anim_clock.getElapsedTime().asMilliseconds() / 1000 > 1.f) {
 		anim_clock.restart();
 	}
-	
 	shape.setTexture(&sitting);
 	shape.setTextureRect(writing[(int)((double)anim_clock.getElapsedTime().asMilliseconds() / 1000 / 0.25f)]);
 	shape.setSize(Vector2f(WIDTH / 2, HEIGHT / 1.5f));	
@@ -221,6 +220,7 @@ void person::anim_disappearing(){
 	if (alpha > 0){
 		alpha -= anim_speed * 50 * deltaTime;
 		shape.move( - anim_speed * 2 * deltaTime, 0);
+		if (alpha <= 0) alpha = 0;
 	}
 	else {
 		alpha = 0;
@@ -230,7 +230,10 @@ void person::anim_disappearing(){
 
 // анимация появления
 void person::anim_appearing(){
-	if (alpha < 255) alpha += anim_speed * 50 * deltaTime;
+	if (alpha < 255) {
+		alpha += anim_speed * 50 * deltaTime;
+		if (alpha >= 255) alpha = 255;
+	}
 	if (position.x > shape.getPosition().x) shape.move(anim_speed * 2 * deltaTime, 0);
 	if (shape.getPosition().x >= position.x && alpha >= 255){
 		alpha = 255;

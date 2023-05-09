@@ -2,43 +2,44 @@
 
 int main()
 {
-//	RectangleShape logo;
-//	RectangleShape background;
-//	logo.setSize(Vector2f(WIDTH / 3, HEIGHT / 2));
-//	logo.setOrigin(Vector2f(logo.getSize().x / 2, logo.getSize().y / 2));
-//	logo.setPosition(WIDTH / 2, HEIGHT / 2);
-//	background.setSize(Vector2f(WIDTH, HEIGHT));
-//	background.setFillColor(Color(128, 128, 128, 255));
-//	
-//	Texture mehmat;
-//	Texture sfedu;
-//	
-//	mehmat.loadFromFile("Sprites/mehmat_logo.png");
-//	sfedu.loadFromFile("Sprites/sfedu_logo.png");
-//	
-//	logo.setTexture(&sfedu);
-//	
-//	window.clear();
-//	window.draw(logo);
-//	window.display();
-////	window.draw()
-//	
-//    // текстура заднего фона
-//
+	RectangleShape logo;
+	RectangleShape background;
+	logo.setSize(Vector2f(WIDTH / 3, HEIGHT / 2));
+	logo.setOrigin(Vector2f(logo.getSize().x / 2, logo.getSize().y / 2));
+	logo.setPosition(WIDTH / 2, HEIGHT / 2);
+	background.setSize(Vector2f(WIDTH, HEIGHT));
+	background.setFillColor(Color(128, 128, 128, 255));
+	
+	Texture mehmat;
+	Texture sfedu;
+	
+	mehmat.loadFromFile("Sprites/mehmat_logo.png");
+	sfedu.loadFromFile("Sprites/sfedu_logo.png");
+	
+	logo.setTexture(&sfedu);
+	
+	window.clear();
+	window.draw(logo);
+	window.display();
+	
+    // текстура заднего фона
+
+	
+
+	Sleep(2000);
+	
+	logo.setTexture(&mehmat);
+	logo.setSize(Vector2f(WIDTH / 3, WIDTH / 5));
+	logo.setOrigin(Vector2f(logo.getSize().x / 2, logo.getSize().y / 2));
+	logo.setTextureRect(IntRect(0, 0, mehmat.getSize().x, mehmat.getSize().y));
+	window.clear();
+	window.draw(background);
+	window.draw(logo);
+	window.display();
+	Sleep(2000);
+	
 	setlocale(LC_ALL, "Russian");
 	main_font.loadFromFile("Fonts/Chava-Regular.ttf");
-//
-//	Sleep(2000);
-//	
-//	logo.setTexture(&mehmat);
-//	logo.setSize(Vector2f(WIDTH / 3, WIDTH / 5));
-//	logo.setOrigin(Vector2f(logo.getSize().x / 2, logo.getSize().y / 2));
-//	logo.setTextureRect(IntRect(0, 0, mehmat.getSize().x, mehmat.getSize().y));
-//	window.clear();
-//	window.draw(background);
-//	window.draw(logo);
-//	window.display();
-//	Sleep(2000);
 	
 	while(window.isOpen()){
 		view.setCenter(Vector2f(WIDTH / 2, HEIGHT / 2));
@@ -75,7 +76,17 @@ int main()
 			character[1].idle_rect[1] = IntRect(345, 0, 115, 256);
 			
 			character[2].name = "зендей";
+			character[2].shape.setSize(Vector2f(WIDTH * 0.5f, HEIGHT * 0.7f));
+			character[2].shape.setOrigin(Vector2f(character[2].shape.getSize().x / 2, character[2].shape.getSize().y));
 			character[2].setPosition(main_bar.current_right_positoin);
+			character[2].setPosition(main_bar.current_right_positoin);
+			character[2].say_txt.loadFromFile("Sprites/Zenday_say.png");
+			character[2].say[0] = IntRect(2, 2, 353, 254);
+			character[2].say[1] = IntRect(355, 2, 353, 254);
+			character[2].idle_rect[0] = IntRect(2, 2, 353, 254);
+			character[2].idle_rect[1] = IntRect(1060, 2, 353, 254);
+			character[2].shape_origin[0] = character[2].shape.getOrigin();
+			character[2].shape_origin[1] = Vector2f(character[2].shape.getOrigin().x + character[2].moving_coefficient, character[2].shape.getOrigin().y);
 			
 			main_bar.current_person = &character[0];
 			
@@ -128,7 +139,6 @@ int main()
 		        deltaTime = (double)constructor::clock.getElapsedTime().asMicroseconds() / 1000000;
 			}
 		}
-//		if (level4_start) constructor::level4();
 		if (level5_start) constructor::level5();
 		if (level5_5_start) constructor::level5_5();
 		if (level6_start) constructor::level6();

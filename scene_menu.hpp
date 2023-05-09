@@ -74,7 +74,6 @@ void scene_menu::update(){
 			level2_start = false;
 			level2_5_start = false;
 			level3_start = false;
-			level4_start = false;
 			level5_start = false;
 			level5_5_start = false;
 			level6_start = false;

@@ -17,6 +17,8 @@ namespace level2_nmspc{
 		
 	public:
 		
+		bool drawShadow;
+		
 		RectangleShape shape;
 		RectangleShape shadow;
 		
@@ -54,6 +56,7 @@ namespace level2_nmspc{
 			y = HEIGHT * 0.8f;
 			speed = WIDTH / 6.5f;
 			movement = true;
+			drawShadow = true;
 			
 			up_barrier = HEIGHT / 4;
 			down_barrier = HEIGHT;
@@ -101,7 +104,7 @@ namespace level2_nmspc{
 	
 	// отрисовка
 	void character::render(){
-		window.draw(shadow);
+		if (drawShadow) window.draw(shadow);
 		window.draw(shape);
 		if (debugging) window.draw(collider);
 	}

@@ -80,7 +80,7 @@ namespace constructor{
 		
 		Texture back_texture;
 	    RectangleShape background;
-	    back_texture.loadFromFile("Sprites/background.png");
+	    back_texture.loadFromFile("Sprites/back.png");
 	    
 	    // масштабирование заднего фона
     	background_init(back_texture, background);
@@ -265,7 +265,7 @@ namespace constructor{
 		double alpha = 0; // степень прозрачности фона затемнения
 		int old_act = main_bar.act;
 		
-		main_bar.script.open("Scripts/Script.txt");
+		main_bar.script.open("Scripts/Script.dat");
 	
 		person character[4];
 			
@@ -340,7 +340,7 @@ namespace constructor{
 	    
 	    // масштабирование заднего фона
 	    background_init(black, background);
-	    window.setFramerateLimit(60);
+	    window.setFramerateLimit(55);
 	    
 	    music.setLoop(true);
 	    music.play();
@@ -489,11 +489,17 @@ namespace constructor{
 		hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
 		
 		// триггер удостоверения личности
-		trigger identity_card = trigger(WIDTH / 8, HEIGHT / 8);
-		identity_card.setPosition(WIDTH * 0.4f, HEIGHT * 0.5f);
+		trigger identity_card = trigger(WIDTH  * 0.15f, HEIGHT * 0.3f);
+		identity_card.setPosition(WIDTH * 0.3f, HEIGHT * 0.5f);
 		
 		trigger window_view = trigger(WIDTH / 10, HEIGHT / 5);
 		window_view.setPosition(WIDTH * 0.15f, HEIGHT * 0.7f);
+		
+		identity_card.isImage = true;
+		identity_card.image_txt.loadFromFile("Sprites/objects.png");
+		identity_card.image.setSize(Vector2f(WIDTH / 25, HEIGHT / 20));
+		identity_card.image.setTexture(&identity_card.image_txt);
+		identity_card.image.setTextureRect(IntRect(1, 23, 18, 13));
 		
 		// объект персонажа и диалоговой панели
 		level2_nmspc::main_player hero; // персонаж
@@ -506,6 +512,7 @@ namespace constructor{
 		
 		hero.movement = false;
 		bool cutscene = false;
+		hero.drawShadow = false;
 		
 		// настройка заднего фона
 		RectangleShape background; // форма заднего фона
@@ -606,7 +613,7 @@ namespace constructor{
 			
 			// ОБРАБОТКА СОБЫТИЙ
 			if (hero.standing && hero.stand && (bar.script_act == 0)){
-				bar.isActive = true;
+				bar.isActive = hero.drawShadow = true;
 				event_timer.restart();
 			}
 			// акт 1
@@ -626,6 +633,7 @@ namespace constructor{
 					hint.setString(hint_text);
 					hint.setPosition(WIDTH / 2 - hint_text.length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
 					if(Keyboard::isKeyPressed(Keyboard::E) || Joystick::isButtonPressed(0, 1)){
+						identity_card.isImage = false;
 						current_act = 1;
 					}
 				}
@@ -771,12 +779,12 @@ namespace constructor{
 	        window.draw(background);
 	        if(!cutscene) {
 	        	window.draw(desk);
+	        	identity_card.render();
 				hero.render();
 				emris.render();
 			}
 	        window.draw(hint);
 	        bar.render();
-			identity_card.render();
 			window_view.render();
 			_inventory.render();
 			window.draw(dark_front);
@@ -796,7 +804,7 @@ namespace constructor{
 		
 		panel main_bar;
 		
-		main_bar.script.open("Scripts/Script3.txt");
+		main_bar.script.open("Scripts/Script3.dat");
 		
 		person character[2];
 		
@@ -863,7 +871,7 @@ namespace constructor{
 	void level4(){
 		panel main_bar;
 		
-		main_bar.script.open("Scripts/Script5.txt");
+		main_bar.script.open("Scripts/Script5.dat");
 		
 		person character[3];
 		
@@ -882,11 +890,19 @@ namespace constructor{
 		character[1].idle_rect[1] = IntRect(115, 0, 115, 256);
 		
 		character[2].name = "зендей";
+		character[2].shape.setSize(Vector2f(WIDTH * 0.25f, HEIGHT * 0.7f));
+		character[2].shape.setOrigin(Vector2f(character[1].shape.getSize().x / 2, character[1].shape.getSize().y));
 		character[2].setPosition(main_bar.current_right_positoin);
+		character[2].setPosition(main_bar.current_right_positoin);
+		character[2].say_txt.loadFromFile("Sprites/Zenday_say.png");
+		character[2].say[0] = IntRect(2, 2, 353, 254);
+		character[2].say[1] = IntRect(355, 2, 353, 254);
+		character[2].idle_rect[0] = IntRect(2, 2, 353, 254);
+		character[2].idle_rect[1] = IntRect(1060, 2, 353, 254);
 		
 		main_bar.current_person = &character[0];
 		
-		while (window.isOpen() && level4_start)
+		while (window.isOpen() && true)
 	    {
 	        clock.restart();
 	        
@@ -922,7 +938,7 @@ namespace constructor{
 		scene_menu	SceneMenu;
 		
 		interrogation *main_bar = new interrogation();
-		(*main_bar).script.open("Scripts/Script5.txt");
+		(*main_bar).script.open("Scripts/Script5.dat");
 		
 		(*main_bar).nessesary_obj = 4;
 		(*main_bar).interrog_act = 5;
@@ -944,7 +960,17 @@ namespace constructor{
 		character[0].setPosition((*main_bar).current_left_positoin);
 		
 		character[1].name = "зендей";
+		character[1].shape.setSize(Vector2f(WIDTH * 0.5f, HEIGHT * 0.7f));
+		character[1].shape.setOrigin(Vector2f(character[1].shape.getSize().x / 2, character[1].shape.getSize().y));
 		character[1].setPosition((*main_bar).current_right_positoin);
+		character[1].setPosition((*main_bar).current_right_positoin);
+		character[1].say_txt.loadFromFile("Sprites/Zenday_say.png");
+		character[1].say[0] = IntRect(2, 2, 353, 254);
+		character[1].say[1] = IntRect(355, 2, 353, 254);
+		character[1].idle_rect[0] = IntRect(2, 2, 353, 254);
+		character[1].idle_rect[1] = IntRect(1060, 2, 353, 254);
+		character[1].shape_origin[0] = character[1].shape.getOrigin();
+		character[1].shape_origin[1] = Vector2f(character[1].shape.getOrigin().x + character[1].moving_coefficient, character[1].shape.getOrigin().y);
 		
 		(*main_bar).current_person = &character[1];
 		
@@ -1009,7 +1035,7 @@ namespace constructor{
 		panel main_bar;
 		scene_menu SceneMenu;
 		
-		main_bar.script.open("Scripts/Script5_5.txt");
+		main_bar.script.open("Scripts/Script5_5.dat");
 		
 		person character[2];
 		
@@ -1105,15 +1131,27 @@ namespace constructor{
 		
 		trigger anna_trig = trigger(anna.getSize().x * 1.5f, anna.getSize().x * 0.5f);
 		anna_trig.setOrigin(Vector2f(anna.getSize().x * 1.5f, anna.getSize().x * 0.25f));
-		trigger note_trig = trigger(WIDTH * 0.1f, HEIGHT* 0.1f);
+		trigger note_trig = trigger(WIDTH * 0.25f, HEIGHT* 0.4f);
 		trigger map_trig = trigger(WIDTH * 0.1f, HEIGHT* 0.1f);
 		
-		note_trig.setPosition(WIDTH * 0.3, HEIGHT * 0.7f);
+		note_trig.setPosition(WIDTH * 0.1f, HEIGHT * 0.55f);
 		map_trig.setPosition(WIDTH * 0.6, HEIGHT * 0.7f);
+		
+		note_trig.isImage = true;
+		note_trig.image_txt.loadFromFile("Sprites/mapAndNote.png");
+		note_trig.image.setSize(Vector2f(WIDTH / 20, HEIGHT / 20));
+		note_trig.image.setTexture(&note_trig.image_txt);
+		note_trig.image.setTextureRect(IntRect(8, 22, 19, 9));
+		
+		map_trig.isImage = true;
+		map_trig.image_txt.loadFromFile("Sprites/mapAndNote.png");
+		map_trig.image.setSize(Vector2f(WIDTH / 20, HEIGHT / 20));
+		map_trig.image.setTexture(&map_trig.image_txt);
+		map_trig.image.setTextureRect(IntRect(0, 44, 32, 20));
 		
 		bar.isDarkness = false;
 		bar.allowed = false;
-		bar.script.open("Scripts/Script6.txt");
+		bar.script.open("Scripts/Script6.dat");
 		
 		_map.shape.setTexture(&objcts_txt);
     	_map.shape.setTextureRect(IntRect(0, 39, 32, 25));
@@ -1181,7 +1219,7 @@ namespace constructor{
 		
 		hero.setPosition(Vector2f(WIDTH * 0.35f, HEIGHT * 1.25f));
 		emris.setPosition(Vector2f(WIDTH * 0.3f, HEIGHT * 1.50f));
-		anna.setPosition(Vector2f(WIDTH * 0.75f, HEIGHT * 0.8f));
+		anna.setPosition(Vector2f(WIDTH * 0.75f, HEIGHT * 0.85f));
 		anna.down_barrier = HEIGHT * 1.5f;
 		
 		hero.allowed = false;
@@ -1207,7 +1245,7 @@ namespace constructor{
 		emris.right_walking[1] = IntRect(45, 100, 43, 88);
 		emris.right_walking[2] = IntRect(90, 100, 43, 88);
 		emris.right_walking[3] = IntRect(135, 100, 43, 88);
-		emris.right_walking[4] = IntRect(180, 100, 43, 88);;
+		emris.right_walking[4] = IntRect(180, 100, 43, 88);
 		emris.right_walking[5] = IntRect(215, 100, 43, 88);
 			
 		emris.up_walking[0] = IntRect(0, 200, 43, 88);
@@ -1221,13 +1259,35 @@ namespace constructor{
 		emris.down_walking[1] = IntRect(44, 290, 43, 88);
 		emris.down_walking[2] = IntRect(88, 290, 43, 88);
 		emris.down_walking[3] = IntRect(132, 290, 43, 88);
-		emris.down_walking[4] = IntRect(176, 290, 43, 88);;
+		emris.down_walking[4] = IntRect(176, 290, 43, 88);
 		emris.down_walking[5] = IntRect(215, 290, 43, 88);
 			
 		emris.idle[0] = IntRect(260, 200, 43, 88);
 		emris.idle[1] = IntRect(260, 290, 43, 88);
 		emris.idle[2] = IntRect(260, 100, 43, 88);
 		emris.idle[3] = IntRect(260, 10, 43, 88);
+		
+		anna.texture.loadFromFile("Sprites/anna_atlas.png");
+		anna.shape.setTexture(&anna.texture);
+		
+		anna.down_walking[0] = IntRect(0, 0, 46, 88);
+		anna.down_walking[1] = IntRect(46, 0, 46, 88);
+		anna.down_walking[2] = IntRect(92, 0, 46, 88);
+		anna.down_walking[3] = IntRect(136, 0, 46, 88);
+		anna.down_walking[4] = IntRect(180, 0, 46, 88);
+		anna.down_walking[5] = IntRect(220, 0, 46, 88);
+			
+		anna.up_walking[0] = IntRect(0, 90, 46, 88);
+		anna.up_walking[1] = IntRect(46, 90, 46, 88);
+		anna.up_walking[2] = IntRect(92, 90, 46, 88);
+		anna.up_walking[3] = IntRect(136, 90, 46, 88);
+		anna.up_walking[4] = IntRect(180, 90, 46, 88);;
+		anna.up_walking[5] = IntRect(220, 90, 46, 88);
+		
+		anna.idle[0] = IntRect(272, 95, 43, 88);
+		anna.idle[1] = IntRect(272, 95, 43, 88);
+		anna.idle[2] = IntRect(272, 95, 43, 88);
+		anna.idle[3] = IntRect(272, 95, 43, 88);
 		
 		RectangleShape back;
 		back.setSize(Vector2f(WIDTH, HEIGHT));
@@ -1300,6 +1360,7 @@ namespace constructor{
 							hint.setPosition(WIDTH / 2 - ((string)(hint.getString())).length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
 							if (Keyboard::isKeyPressed(Keyboard::E)){
 								get_note = true;
+								note_trig.isImage = false;
 							}
 						}
 						else if (map_trig.intersects(hero.collision_rect) && !get_map){
@@ -1307,6 +1368,7 @@ namespace constructor{
 							hint.setPosition(WIDTH / 2 - ((string)(hint.getString())).length() * (HEIGHT + WIDTH) / 4 * 0.018f, HEIGHT - (HEIGHT + WIDTH) / 2 * 0.04f);
 							if (Keyboard::isKeyPressed(Keyboard::E)){
 								get_map = true;
+								map_trig.isImage = false;
 							}
 						}
 						else{
@@ -1324,7 +1386,7 @@ namespace constructor{
 						isDialogActive = false;
 					}
 					else if (bar.act == 4){
-						if (anna.getPosition().y > HEIGHT * 0.75f) anna.dir = UP;
+						if (anna.getPosition().y > HEIGHT * 0.85f) anna.dir = UP;
 						else {
 							anna.dir = STOP;
 							if (anna_trig.intersects(hero.collision_rect)){
@@ -1387,6 +1449,9 @@ namespace constructor{
 	    	window.clear();
 	        window.setView(view);
 	        window.draw(back);
+	        anna_trig.render();
+	        note_trig.render();
+	        map_trig.render();
 	        DrawSprites(shapes, position, 3);
 	        window.draw(hint);
 	        _inventory.render();
@@ -1394,9 +1459,6 @@ namespace constructor{
 	        bar.render();
 	        window.draw(dark_front);
 	        if (timer_for_darkness.getElapsedTime().asSeconds() < 3) window.draw(start_text);
-	        anna_trig.render();
-	        note_trig.render();
-	        map_trig.render();
 	        SceneMenu.render();
 	        window.display();
 	        
@@ -1417,7 +1479,7 @@ namespace constructor{
 		scene_menu	SceneMenu;
 		
 		interrogation *main_bar = new interrogation();
-		(*main_bar).script.open("Scripts/Script7.txt");
+		(*main_bar).script.open("Scripts/Script7.dat");
 		
 //		(*main_bar).nessesary_obj = 4;
 		(*main_bar).interrog_act = 5;
